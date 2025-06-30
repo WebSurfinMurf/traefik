@@ -29,19 +29,26 @@ if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
 fi
 
 echo "Starting Traefik (${TRAEFIK_IMAGE:-traefik:latest})…"
-# build docker run command with multiple --network flags
+
+# Build network flags array
+declare -a network_flags
+for net in "${nets[@]}"; do
+  network_flags+=(--network "$net")
+done
+
+# Run Traefik container
 docker run -d \
   --name "$CONTAINER_NAME" \
   --restart unless-stopped \
-  $(for net in "${nets[@]}"; do echo "  --network $net \\"; done) \
+  "${network_flags[@]}" \
   -p "${TRAEFIK_ENTRYPOINT_HTTP:-80}:80" \
   -p "${TRAEFIK_ENTRYPOINT_HTTPS:-443}:443" \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v "$PWD/traefik.yml":${CONFIG_FILE}:ro \
-  -v "$PWD/acme.json":${ACME_FILE}:ro \
-  "${TRAEFIK_IMAGE:-traefik:latest}"
+  -v "$PWD/traefik.yml":$CONFIG_FILE:ro \
+  -v "$PWD/acme.json":$ACME_FILE:ro \
+  "$TRAEFIK_IMAGE"
 
 echo "✔️ Traefik is live on ports ${TRAEFIK_ENTRYPOINT_HTTP:-80}/${TRAEFIK_ENTRYPOINT_HTTPS:-443}"
 
-echo "Configuration file: ${CONFIG_FILE}"  
-echo "ACME storage: ${ACME_FILE}"
+echo "Configuration file: $CONFIG_FILE"
+echo "ACME storage: $ACME_FILE"
