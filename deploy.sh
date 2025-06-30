@@ -41,12 +41,13 @@ declare -a run_cmd=(docker run -d --name "${CONTAINER_NAME}" --restart unless-st
 declare -a docker_flags=(
   # attach to networks
   $(for net in "${nets[@]}"; do echo "--network ${net}"; done)
-  # ports
-  -p "${TRAEFIK_ENTRYPOINT_HTTP:-80}:80"
-  -p "${TRAEFIK_ENTRYPOINT_HTTPS:-443}:443"
-  -p "${DASHBOARD_PORT}:8080"       # dashboard API
-  -p "${METRICS_PORT}:9100"        # Prometheus metrics endpoint
-  # volumes
+  # ports: host->container (bind to LAN IP only)
+HOST_IP="$(hostname -I | awk '{print $1}')"
+  -p "${HOST_IP}:${TRAEFIK_ENTRYPOINT_HTTP}:80"      # HTTP entrypoint
+  -p "${HOST_IP}:${TRAEFIK_ENTRYPOINT_HTTPS}:443"    # HTTPS entrypoint
+  -p "${HOST_IP}:${TRAEFIK_DASHBOARD_PORT}:8080"     # dashboard API
+  -p "${HOST_IP}:${METRICS_PORT}:9100"               # Prometheus metrics endpoint
+# volumes
   -v /var/run/docker.sock:/var/run/docker.sock:ro
   -v "${PWD}/traefik.yml":${CONFIG_FILE}:ro
   -v "${PWD}/acme.json":${ACME_FILE}:ro
@@ -59,8 +60,8 @@ declare -a docker_flags=(
   # entryPoints
   --entryPoints.web.address=":80" \
   --entryPoints.websecure.address=":443" \
-  --entryPoints.traefik.address=":${DASHBOARD_PORT}" \
-  --entryPoints.metrics.address=":${METRICS_PORT}" \
+  --entryPoints.traefik.address=":8080" \
+  --entryPoints.metrics.address=":9100" \
   # providers
   --providers.docker=true \
   --providers.docker.exposedbydefault=false \
@@ -71,6 +72,7 @@ declare -a docker_flags=(
 )
 
 # Print the full command for debugging
+echo "${run_cmd[@]} ${docker_flags[@]}"
 echo "${run_cmd[@]} ${docker_flags[@]}"
 
 # Execute the command
