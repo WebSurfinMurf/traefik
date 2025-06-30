@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euxo pipefail
 
 # ── Load secrets ────────────────────────────────────────────────────────
 #AI: source project-specific env after pipeline.env loads
