@@ -1,19 +1,36 @@
 # traefik.yml
+
+# API and Dashboard
+api:
+  insecure: true # Warning: Do not expose this to the internet without authentication
+  dashboard: true
+
+# Entrypoints
 entryPoints:
   web:
     address: ":80"
+    # Optional: Redirect all HTTP to HTTPS
+    # http:
+    #   redirections:
+    #     entryPoint:
+    #       to: websecure
+    #       scheme: https
   websecure:
     address: ":443"
 
+# Providers
 providers:
   docker:
-    endpoint: "unix:///var/run/docker.sock"
-    exposedByDefault: false
+    exposedByDefault: false # Recommended to explicitly enable services
+    network: traefik-proxy # Must match the network in your .env file
 
+# Certificate Resolvers (Let's Encrypt)
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: "${TRAEFIK_ACME_EMAIL}"
-      storage: "${TRAEFIK_ACME_FILE}"
+      email: ${ACME_EMAIL} # Variable from .env file
+      storage: /acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
         entryPoint: web
+
