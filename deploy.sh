@@ -15,9 +15,12 @@ NETWORKS="${TRAEFIK_NETWORKS:-proxy-net,keycloak-net}"
 ACME_FILE="${TRAEFIK_ACME_FILE:-/acme.json}"
 CONFIG_FILE="${TRAEFIK_CONFIG_FILE:-/etc/traefik/traefik.yml}"
 CONTAINER_NAME="${TRAEFIK_CONTAINER_NAME:-traefik}"
-DASHBOARD_PORT="${TRAEFIK_DASHBOARD_PORT:-8080}"
+DASHBOARD_PORT="${TRAEFIK_DASHBOARD_PORT:-8088}"
 LOG_LEVEL="${TRAEFIK_LOG_LEVEL:-INFO}"
 METRICS_PORT="${TRAEFIK_METRICS_PORT:-9100}"
+
+# Determine host LAN IP for binding
+HOST_IP="$(hostname -I | awk '{print $1}')"
 
 # ── Infra provisioning ─────────────────────────────────────────────────
 IFS=',' read -r -a nets <<< "${NETWORKS}"
@@ -42,12 +45,11 @@ declare -a docker_flags=(
   # attach to networks
   $(for net in "${nets[@]}"; do echo "--network ${net}"; done)
   # ports: host->container (bind to LAN IP only)
-HOST_IP="$(hostname -I | awk '{print $1}')"
   -p "${HOST_IP}:${TRAEFIK_ENTRYPOINT_HTTP}:80"      # HTTP entrypoint
   -p "${HOST_IP}:${TRAEFIK_ENTRYPOINT_HTTPS}:443"    # HTTPS entrypoint
-  -p "${HOST_IP}:${TRAEFIK_DASHBOARD_PORT}:8080"     # dashboard API
+  -p "${HOST_IP}:${DASHBOARD_PORT}:8080"             # dashboard API
   -p "${HOST_IP}:${METRICS_PORT}:9100"               # Prometheus metrics endpoint
-# volumes
+  # volumes
   -v /var/run/docker.sock:/var/run/docker.sock:ro
   -v "${PWD}/traefik.yml":${CONFIG_FILE}:ro
   -v "${PWD}/acme.json":${ACME_FILE}:ro
@@ -73,13 +75,12 @@ HOST_IP="$(hostname -I | awk '{print $1}')"
 
 # Print the full command for debugging
 echo "${run_cmd[@]} ${docker_flags[@]}"
-echo "${run_cmd[@]} ${docker_flags[@]}"
 
 # Execute the command
 "${run_cmd[@]}" "${docker_flags[@]}"
 
-echo "✔️ Traefik deployed with ports Web:80, HTTPS:443, Dashboard:${DASHBOARD_PORT}, Metrics:${METRICS_PORT}"
-echo "Access dashboard at http://$(hostname -I | awk '{print $1}'):${DASHBOARD_PORT}/dashboard/"
-echo "Metrics endpoint at http://$(hostname -I | awk '{print $1}'):${METRICS_PORT}/metrics"
+echo "✔️ Traefik deployed with ports Web:${TRAEFIK_ENTRYPOINT_HTTP}, HTTPS:${TRAEFIK_ENTRYPOINT_HTTPS}, Dashboard:${DASHBOARD_PORT}, Metrics:${METRICS_PORT}"
+echo "Access dashboard at http://${HOST_IP}:${DASHBOARD_PORT}/dashboard/"
+echo "Metrics endpoint at http://${HOST_IP}:${METRICS_PORT}/metrics"
 echo "Configuration file: ${CONFIG_FILE}"
 echo "ACME storage: ${ACME_FILE}"
