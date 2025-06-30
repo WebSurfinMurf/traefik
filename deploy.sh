@@ -19,8 +19,8 @@ DASHBOARD_PORT="${TRAEFIK_DASHBOARD_PORT:-8088}"
 LOG_LEVEL="${TRAEFIK_LOG_LEVEL:-INFO}"
 METRICS_PORT="${TRAEFIK_METRICS_PORT:-9100}"
 
-# Determine host LAN IP for binding
-HOST_IP="$(hostname -I | awk '{print $1}')"
+# Determine bind address (default to all interfaces)
+BIND_ADDRESS="${TRAEFIK_BIND_ADDRESS:-0.0.0.0}"
 
 # ── Infra provisioning ─────────────────────────────────────────────────
 IFS=',' read -r -a nets <<< "${NETWORKS}"
@@ -44,11 +44,11 @@ declare -a run_cmd=(docker run -d --name "${CONTAINER_NAME}" --restart unless-st
 declare -a docker_flags=(
   # attach to networks
   $(for net in "${nets[@]}"; do echo "--network ${net}"; done)
-  # ports: host->container (bind to LAN IP only)
-  -p "${HOST_IP}:${TRAEFIK_ENTRYPOINT_HTTP}:80"      # HTTP entrypoint
-  -p "${HOST_IP}:${TRAEFIK_ENTRYPOINT_HTTPS}:443"    # HTTPS entrypoint
-  -p "${HOST_IP}:${DASHBOARD_PORT}:8080"             # dashboard API
-  -p "${HOST_IP}:${METRICS_PORT}:9100"               # Prometheus metrics endpoint
+  # ports: host->container (bind to all or specified address)
+  -p "${BIND_ADDRESS}:${TRAEFIK_ENTRYPOINT_HTTP}:80"      # HTTP entrypoint
+  -p "${BIND_ADDRESS}:${TRAEFIK_ENTRYPOINT_HTTPS}:443"    # HTTPS entrypoint
+  -p "${BIND_ADDRESS}:${DASHBOARD_PORT}:8080"             # dashboard API
+  -p "${BIND_ADDRESS}:${METRICS_PORT}:9100"              # Prometheus metrics endpoint
   # volumes
   -v /var/run/docker.sock:/var/run/docker.sock:ro
   -v "${PWD}/traefik.yml":${CONFIG_FILE}:ro
@@ -62,8 +62,8 @@ declare -a docker_flags=(
   # entryPoints
   --entryPoints.web.address=":80" \
   --entryPoints.websecure.address=":443" \
-  --entryPoints.traefik.address=":8080" \
-  --entryPoints.metrics.address=":9100" \
+  --entryPoints.traefik.address=":${DASHBOARD_PORT}" \
+  --entryPoints.metrics.address=":${METRICS_PORT}" \
   # providers
   --providers.docker=true \
   --providers.docker.exposedbydefault=false \
@@ -74,6 +74,7 @@ declare -a docker_flags=(
 )
 
 # Print the full command for debugging
+echo "${run_cmd[@]} ${docker_flags[@]}"
 echo "${run_cmd[@]} ${docker_flags[@]}"
 
 # Execute the command
