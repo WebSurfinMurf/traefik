@@ -1,28 +1,34 @@
 # traefik.yml
 
+# Global log level
+log:
+  level: ${TRAEFIK_LOG_LEVEL:-INFO} # Use variable from .env, default to INFO
+
 # API and Dashboard
 api:
   insecure: true # Warning: Do not expose this to the internet without authentication
   dashboard: true
 
+# Metrics (Prometheus)
+metrics:
+  prometheus:
+    entryPoint: metrics # Use the dedicated metrics entrypoint
+    addEntryPointsLabels: true
+
 # Entrypoints
 entryPoints:
   web:
     address: ":80"
-    # Optional: Redirect all HTTP to HTTPS
-    # http:
-    #   redirections:
-    #     entryPoint:
-    #       to: websecure
-    #       scheme: https
   websecure:
     address: ":443"
+  metrics:
+    address: ":9100"
 
 # Providers
 providers:
   docker:
     exposedByDefault: false # Recommended to explicitly enable services
-    network: traefik-proxy # Must match the network in your .env file
+    network: ${TRAEFIK_NETWORK:-traefik-proxy} # Use variable from .env
 
 # Certificate Resolvers (Let's Encrypt)
 certificatesResolvers:
@@ -33,4 +39,3 @@ certificatesResolvers:
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
         entryPoint: web
-
