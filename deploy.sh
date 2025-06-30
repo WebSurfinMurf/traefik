@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
+# ── deploy.sh ──────────────────────────────────────────────────────────
+# This script deploys Traefik as a reverse proxy container with dashboard, logs, and metrics.
+# Place this file at projects/traefik/deploy.sh and ensure it's executable.
+
 # ── Load secrets ────────────────────────────────────────────────────────
 #AI: source project-specific env after pipeline.env loads
 source "$(dirname "$0")/../secrets/traefik.env"
@@ -11,6 +15,9 @@ NETWORKS="${TRAEFIK_NETWORKS:-proxy-net,keycloak-net}"
 ACME_FILE="${TRAEFIK_ACME_FILE:-/acme.json}"
 CONFIG_FILE="${TRAEFIK_CONFIG_FILE:-/etc/traefik/traefik.yml}"
 CONTAINER_NAME="${TRAEFIK_CONTAINER_NAME:-traefik}"
+DASHBOARD_PORT="${TRAEFIK_DASHBOARD_PORT:-8080}"
+LOG_LEVEL="${TRAEFIK_LOG_LEVEL:-INFO}"
+METRICS_PORT="${TRAEFIK_METRICS_PORT:-9100}"
 
 # ── Infra provisioning ─────────────────────────────────────────────────
 IFS=',' read -r -a nets <<< "${NETWORKS}"
@@ -30,15 +37,37 @@ fi
 echo "Preparing to start Traefik container with the following command:"
 
 # Build run command
-run_cmd=(docker run -d --name "${CONTAINER_NAME}" --restart unless-stopped)
-docker_flags=(
+declare -a run_cmd=(docker run -d --name "${CONTAINER_NAME}" --restart unless-stopped)
+declare -a docker_flags=(
+  # attach to networks
   $(for net in "${nets[@]}"; do echo "--network ${net}"; done)
+  # ports
   -p "${TRAEFIK_ENTRYPOINT_HTTP:-80}:80"
   -p "${TRAEFIK_ENTRYPOINT_HTTPS:-443}:443"
+  -p "${DASHBOARD_PORT}:8080"       # dashboard API
+  -p "${METRICS_PORT}:9100"        # Prometheus metrics endpoint
+  # volumes
   -v /var/run/docker.sock:/var/run/docker.sock:ro
-  -v "$PWD/traefik.yml":${CONFIG_FILE}:ro
-  -v "$PWD/acme.json":${ACME_FILE}:ro
+  -v "${PWD}/traefik.yml":${CONFIG_FILE}:ro
+  -v "${PWD}/acme.json":${ACME_FILE}:ro
+  # image
   "${TRAEFIK_IMAGE}"
+  # core flags
+  --log.level="${LOG_LEVEL}" \
+  --api.dashboard=true \
+  --api.insecure=true \
+  # entryPoints
+  --entryPoints.web.address=":80" \
+  --entryPoints.websecure.address=":443" \
+  --entryPoints.traefik.address=":${DASHBOARD_PORT}" \
+  --entryPoints.metrics.address=":${METRICS_PORT}" \
+  # providers
+  --providers.docker=true \
+  --providers.docker.exposedbydefault=false \
+  # certificates
+  --certificatesResolvers.le.acme.email="${TRAEFIK_ACME_EMAIL}" \
+  --certificatesResolvers.le.acme.storage="${ACME_FILE}" \
+  --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
 )
 
 # Print the full command for debugging
@@ -47,6 +76,8 @@ echo "${run_cmd[@]} ${docker_flags[@]}"
 # Execute the command
 "${run_cmd[@]}" "${docker_flags[@]}"
 
-echo "✔️ Traefik is live on ports ${TRAEFIK_ENTRYPOINT_HTTP:-80}/${TRAEFIK_ENTRYPOINT_HTTPS:-443}"
+echo "✔️ Traefik deployed with ports Web:80, HTTPS:443, Dashboard:${DASHBOARD_PORT}, Metrics:${METRICS_PORT}"
+echo "Access dashboard at http://$(hostname -I | awk '{print $1}'):${DASHBOARD_PORT}/dashboard/"
+echo "Metrics endpoint at http://$(hostname -I | awk '{print $1}'):${METRICS_PORT}/metrics"
 echo "Configuration file: ${CONFIG_FILE}"
 echo "ACME storage: ${ACME_FILE}"
