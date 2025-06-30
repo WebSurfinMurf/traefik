@@ -7,7 +7,8 @@ set -euxo pipefail
 
 # ── Load secrets ────────────────────────────────────────────────────────
 #AI: source project-specific env after pipeline.env loads
-source "$(dirname "$0")/../secrets/traefik.env"
+BASEDIR="$(cd "$(dirname "$0")" && pwd)"
+source "${BASEDIR}/../secrets/traefik.env"
 
 # ── Defaults and environment variables ─────────────────────────────────
 TRAEFIK_IMAGE="${TRAEFIK_IMAGE:-traefik:latest}"
@@ -51,8 +52,8 @@ declare -a docker_flags=(
   -p "${BIND_ADDRESS}:${METRICS_PORT}:9100"              # Prometheus metrics endpoint
   # volumes
   -v /var/run/docker.sock:/var/run/docker.sock:ro
-  -v "${PWD}/traefik.yml":${CONFIG_FILE}:ro
-  -v "${PWD}/acme.json":${ACME_FILE}:ro
+  -v "${BASEDIR}/traefik.yml":${CONFIG_FILE}:ro
+  -v "${BASEDIR}/acme.json":${ACME_FILE}:ro
   # image
   "${TRAEFIK_IMAGE}"
   # core flags
@@ -75,13 +76,19 @@ declare -a docker_flags=(
 
 # Print the full command for debugging
 echo "${run_cmd[@]} ${docker_flags[@]}"
-echo "${run_cmd[@]} ${docker_flags[@]}"
 
 # Execute the command
 "${run_cmd[@]}" "${docker_flags[@]}"
 
-echo "✔️ Traefik deployed with ports Web:${TRAEFIK_ENTRYPOINT_HTTP}, HTTPS:${TRAEFIK_ENTRYPOINT_HTTPS}, Dashboard:${DASHBOARD_PORT}, Metrics:${METRICS_PORT}"
-echo "Access dashboard at http://${HOST_IP}:${DASHBOARD_PORT}/dashboard/"
-echo "Metrics endpoint at http://${HOST_IP}:${METRICS_PORT}/metrics"
-echo "Configuration file: ${CONFIG_FILE}"
-echo "ACME storage: ${ACME_FILE}"
+# Short pause and show recent logs for debugging
+sleep 2
+container_id=$(docker ps --filter "name=${CONTAINER_NAME}" -q)
+echo "Logs for Traefik container (${container_id}):"
+docker logs --tail 50 "$container_id"
+
+# Confirm the container is running
+if [ -n "$container_id" ] && docker inspect -f '{{.State.Running}}' "$container_id" | grep -q true; then
+  echo "✔️ Traefik container is running"
+else
+  echo "❌ Traefik failed to start. Inspect the logs above for errors."
+fi
