@@ -2,23 +2,30 @@
 
 # Global log level
 log:
-  level: INFO # Set log level directly
+  level: INFO
 
 # API and Dashboard
 api:
-  insecure: true # Warning: Do not expose this to the internet without authentication
+  insecure: true
   dashboard: true
 
 # Metrics (Prometheus)
 metrics:
   prometheus:
-    entryPoint: metrics # Use the dedicated metrics entrypoint
+    entryPoint: metrics
     addEntryPointsLabels: true
 
 # Entrypoints
 entryPoints:
   web:
     address: ":80"
+    # This block creates a global, permanent redirect from HTTP to HTTPS
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
   websecure:
     address: ":443"
   metrics:
@@ -27,14 +34,13 @@ entryPoints:
 # Providers
 providers:
   docker:
-    exposedByDefault: false # Recommended to explicitly enable services
-    network: traefik-proxy # Network for Traefik to watch
+    exposedByDefault: false
+    network: traefik-proxy
 
 # Certificate Resolvers (Let's Encrypt)
 certificatesResolvers:
   letsencrypt:
     acme:
-      # The email is now provided by an environment variable, so this line is removed.
       storage: /acme.json
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
