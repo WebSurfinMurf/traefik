@@ -1,15 +1,13 @@
-# redirect.yml
-
 http:
   routers:
-    # 1) Let Let's Encrypt HTTP-01 challenges through on port 80
+    # 1) ACME challenge passthrough
     acme-challenge-router:
       rule: "PathPrefix(`/.well-known/acme-challenge`)"
       entryPoints:
         - web
       service: noop@internal
 
-    # 2) Only redirect the public host to HTTPS
+    # 2) Public hostname → HTTPS
     redirect-router:
       rule: "Host(`embracenow.asuscomm.com`)"
       entryPoints:
@@ -18,8 +16,7 @@ http:
         - https-redirect
       service: noop@internal
 
-    # 3) Your internal Keycloak HTTP entrypoint,
-    #    but guard it so only LAN clients can reach it
+    # 3) Internal HTTP for Keycloak (LAN only + strip HSTS)
     keycloak-internal-http:
       rule: "Host(`keycloak.linuxserver.lan`)"
       entryPoints:
@@ -27,6 +24,7 @@ http:
       service: keycloak-service
       middlewares:
         - internal-whitelist
+        - strip-hsts
 
   middlewares:
     # a) standard HTTPS redirect
@@ -35,8 +33,14 @@ http:
         scheme: https
         permanent: true
 
-    # b) only allow requests from your 192.168.1.0/24 LAN
+    # b) only allow LAN clients
     internal-whitelist:
       ipWhiteList:
         sourceRange:
           - "192.168.1.0/24"
+
+    # c) remove Keycloak’s HSTS header
+    strip-hsts:
+      headers:
+        removeResponseHeaders:
+          - Strict-Transport-Security
