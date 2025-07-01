@@ -76,7 +76,8 @@ DOCKER_CMD=(docker run -d
   -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro
 )
 
-# Conditionally mount DNS-01 config\if [[ "$DNS_ENABLED" == true ]]; then
+# Conditionally mount DNS-01 config if enabled
+if [[ "$DNS_ENABLED" == true ]]; then
   DOCKER_CMD+=(
     -v "$SCRIPT_DIR/dns.yml":/etc/traefik/dns.yml:ro
   )
