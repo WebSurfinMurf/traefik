@@ -48,6 +48,7 @@ docker rm -f "$TRAEFIK_CONTAINER_NAME" 2>/dev/null || true
 # Pull the Traefik image
 docker pull "$TRAEFIK_IMAGE"
 
+# --providers.docker.network=traefik-proxy \
 # Run the Traefik container
 docker run -d \
   --name "$TRAEFIK_CONTAINER_NAME" \
