@@ -3,29 +3,28 @@
 # ======================================================================
 # Traefik Deployment Script (Single Env File)
 # ======================================================================
-# Reads Traefik static config and script-specific settings
-# from a unified .env, computes host ports, and runs the Traefik container.
+# Uses unified .env for both Traefik static config and script-specific vars
 
-# Ensure script-relative paths
+# Set script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Path to the unified Traefik env file
+# Unified environment file
 ENV_FILE="../secrets/traefik.env"
 
-# Pre-flight: ensure env file exists
+# Check env file exists
 if [[ ! -f "$ENV_FILE" ]]; then
-  echo "Error: Environment file not found at $ENV_FILE"
+  echo "Error: Missing environment file at $ENV_FILE"
   exit 1
 fi
 
-# Export all variables from env file
+# Export environment
 set -o allexport
 source "$ENV_FILE"
 set +o allexport
 
-# Required variables validation
-: "${TRAEFIK_CONTAINER_NAME:?TRAEFIK_CONTAINER_NAME must be set}
+# Validate required vars
+: "${TRAEFIK_CONTAINER_NAME:?TRAEFIK_CONTAINER_NAME must be set}"
 : "${TRAEFIK_IMAGE:?TRAEFIK_IMAGE must be set}"
 : "${TRAEFIK_NETWORK:?TRAEFIK_NETWORK must be set}"
 : "${TRAEFIK_PROVIDERS_DOCKER_NETWORK:?TRAEFIK_PROVIDERS_DOCKER_NETWORK must be set}"
@@ -35,25 +34,25 @@ set +o allexport
 : "${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS:?TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS must be set}"
 : "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL:?ACME email must be set}"
 
-# Derive host ports by stripping leading ':'
+# Compute host ports
 HTTP_PORT="${TRAEFIK_ENTRYPOINTS_WEB_ADDRESS#:}"
 HTTPS_PORT="${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS#:}"
 METRICS_PORT="${TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS#:}"
 DASHBOARD_PORT="${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS#:}"
 
-# Create Docker network if needed
+# Create network
 docker network create "$TRAEFIK_NETWORK" 2>/dev/null || true
 
-# Prepare acme.json storage
+# Prepare acme.json
 touch "$SCRIPT_DIR/acme.json" && chmod 600 "$SCRIPT_DIR/acme.json"
 
-# Remove old container if exists
+# Remove old container
 docker rm -f "$TRAEFIK_CONTAINER_NAME" 2>/dev/null || true
 
-# Pull the Traefik image
+# Pull image
 docker pull "$TRAEFIK_IMAGE"
 
-# Run Traefik container
+# Run container
 docker run -d \
   --name "$TRAEFIK_CONTAINER_NAME" \
   --restart=always \
@@ -69,9 +68,6 @@ docker run -d \
   -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro \
   "$TRAEFIK_IMAGE"
 
-# Summary output
-echo "Traefik deployed as '$TRAEFIK_CONTAINER_NAME'"
-echo "HTTP      : http://<host>:$HTTP_PORT"
-echo "HTTPS     : https://<host>:$HTTPS_PORT"
-echo "Metrics   : http://<host>:$METRICS_PORT/metrics"
-echo "Dashboard : http://<host>:$DASHBOARD_PORT"
+# Summary
+echo "Traefik '$TRAEFIK_CONTAINER_NAME' deployed"
+echo "Ports: HTTP=$HTTP_PORT, HTTPS=$HTTPS_PORT, Metrics=$METRICS_PORT, Dashboard=$DASHBOARD_PORT"
