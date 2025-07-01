@@ -19,6 +19,13 @@ metrics:
 entryPoints:
   web:
     address: ":80"
+    # This block creates a global, permanent redirect from HTTP to HTTPS
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
   websecure:
     address: ":443"
   metrics:
@@ -30,8 +37,7 @@ providers:
     exposedByDefault: false
     network: traefik-proxy
 
-# Certificate Resolvers are not needed for an HTTP-only setup
-# but we leave the empty section so Traefik doesn't error if referenced.
+# Certificate Resolvers (Let's Encrypt)
 certificatesResolvers:
   letsencrypt:
     acme:
