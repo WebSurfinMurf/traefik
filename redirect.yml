@@ -1,0 +1,26 @@
+# redirect.yml
+
+# Exclude ACME HTTP-01 challenge paths from HTTPS redirects
+# Redirect all other HTTP traffic to HTTPS
+
+http:
+  routers:
+    acme-challenge-router:
+      rule: "PathPrefix(`/.well-known/acme-challenge`)"
+      entryPoints:
+        - web
+      service: noop@internal
+
+    redirect-router:
+      rule: "HostRegexp(`{host:.+}`)"
+      entryPoints:
+        - web
+      middlewares:
+        - https-redirect
+      service: noop@internal
+
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
