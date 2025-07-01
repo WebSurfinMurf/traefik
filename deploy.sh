@@ -58,7 +58,7 @@ docker run -d \
   -p "$METRICS_PORT":9100 \
   -p "$DASHBOARD_PORT":8083 \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json:ro \
+  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json:rw \
   -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro \
   -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro \
   "$TRAEFIK_IMAGE"
