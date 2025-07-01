@@ -1,3 +1,4 @@
+```bash
 #!/usr/bin/env bash
 
 # ======================================================================
@@ -24,17 +25,17 @@ fi
 source "$ENV_FILE"
 
 # Required variables
-: "${TRAEFIK_CONTAINER_NAME:?}"                 # Traefik container name
-: "${TRAEFIK_IMAGE:?}"                          # Traefik image (e.g., traefik:v3.4.3)
-: "${TRAEFIK_NETWORK:?}"                        # Docker network for routing
-: "${TRAEFIK_WEB_PORT:?}"                       # HTTP port (host)
-: "${TRAEFIK_WEBSECURE_PORT:?}"                 # HTTPS port (host)
-: "${TRAEFIK_METRICS_PORT:?}"                   # Prometheus metrics port (host)
-: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL:?}"  # ACME email
+: "${TRAEFIK_CONTAINER_NAME:?TRAEFIK_CONTAINER_NAME must be set}"
+: "${TRAEFIK_IMAGE:?TRAEFIK_IMAGE must be set}"
+: "${TRAEFIK_NETWORK:?TRAEFIK_NETWORK must be set}"
+: "${TRAEFIK_WEB_PORT:?TRAEFIK_WEB_PORT must be set}"
+: "${TRAEFIK_WEBSECURE_PORT:?TRAEFIK_WEBSECURE_PORT must be set}"
+: "${TRAEFIK_METRICS_PORT:?TRAEFIK_METRICS_PORT must be set}"
+: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL:?ACME email must be set}"
 
-# DNS-01 variables are optional; if unset, DNS-01 is skipped
+# Determine if DNS-01 should be enabled (both vars must be set)
 DNS_ENABLED=false
-if [[ -n "$TRAEFIK_DNS_PROVIDER" && -n "$TRAEFIK_DNS_API_TOKEN" ]]; then
+if [[ -n "$TRAEFIK_DNS_PROVIDER" ]] && [[ -n "$TRAEFIK_DNS_API_TOKEN" ]]; then
   DNS_ENABLED=true
 fi
 
@@ -43,20 +44,19 @@ docker network create "$TRAEFIK_NETWORK" 2>/dev/null || \
   echo "Network '$TRAEFIK_NETWORK' already exists."
 
 # Prepare acme.json for Let's Encrypt storage
-touch "$SCRIPT_DIR/acme.json"
-chmod 600 "$SCRIPT_DIR/acme.json"
+touch "$SCRIPT_DIR/acme.json" && chmod 600 "$SCRIPT_DIR/acme.json"
 
-# Clean up any existing container
+# Clean up existing container if present
 if docker ps -q -f name="$TRAEFIK_CONTAINER_NAME" | grep -q .; then
-  docker stop "$TRAEFIK_CONTAINER_NAME"
-  docker rm   "$TRAEFIK_CONTAINER_NAME"
+  docker rm -f "$TRAEFIK_CONTAINER_NAME"
 fi
 
 # Pull the Traefik image
 docker pull "$TRAEFIK_IMAGE"
 
 # Build docker run command
-DOCKER_CMD=(docker run -d
+DOCKER_CMD=(
+  docker run -d
   --name "$TRAEFIK_CONTAINER_NAME"
   --restart always
   --network "$TRAEFIK_NETWORK"
@@ -71,29 +71,30 @@ DOCKER_CMD=(docker run -d
   -p "$TRAEFIK_METRICS_PORT":9100
   -p 8080:8080
   -v /var/run/docker.sock:/var/run/docker.sock:ro
-  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json
-  -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro
-  -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro
+  -v "$SCRIPT_DIR/acme.json:/etc/traefik/acme.json:ro"
+  -v "$SCRIPT_DIR/traefik.yml:/etc/traefik/traefik.yml:ro"
+  -v "$SCRIPT_DIR/redirect.yml:/etc/traefik/redirect.yml:ro"
 )
 
-# Conditionally mount DNS-01 config if enabled
+# Conditionally add DNS-01 mount
 if [[ "$DNS_ENABLED" == true ]]; then
   DOCKER_CMD+=(
-    -v "$SCRIPT_DIR/dns.yml":/etc/traefik/dns.yml:ro
+    -v "$SCRIPT_DIR/dns.yml:/etc/traefik/dns.yml:ro"
   )
   echo "DNS-01 challenge enabled via provider: $TRAEFIK_DNS_PROVIDER"
 else
   echo "Skipping DNS-01 challenge (TRAEFIK_DNS_PROVIDER or API token not set)"
 fi
 
-# Finally, add image to command
+# Add the image tag last
+docker run_cmd="\${DOCKER_CMD[@]}"
 DOCKER_CMD+=("$TRAEFIK_IMAGE")
 
 # Execute deployment
 echo "Running: ${DOCKER_CMD[*]}"
 "${DOCKER_CMD[@]}"
 
-# Summary
+# Summary output
 echo "Traefik deployed: $TRAEFIK_CONTAINER_NAME"
 echo "Dashboard: http://localhost:8080"
 echo "Metrics: http://localhost:$TRAEFIK_METRICS_PORT/metrics"
