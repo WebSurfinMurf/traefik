@@ -3,99 +3,64 @@
 # ======================================================================
 # Traefik Deployment Script (Items 1-4)
 # ======================================================================
-# Implements:
-#   1. Dynamic HTTP→HTTPS redirects via redirect.yml (excluding ACME paths)
-#   2. DNS-01 challenge fallback via dns.yml (optional)
-#   3. Docker labels on services (apply in your service definitions)
-#   4. Health checks to auto-restart Traefik if unhealthy
+# This script deploys Traefik using Docker,
+# leveraging a unified environment file for Traefik configuration
+# and script-specific variables for container settings.
 
 # Ensure script-relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Path to your environment file
+# Path to the unified Traefik env file
 ENV_FILE="../secrets/traefik.env"
 
-# Pre-flight: ensure .env exists
+# Ensure the env file exists
 if [[ ! -f "$ENV_FILE" ]]; then
-  echo "Error: Environment file not found at $ENV_FILE"
+  echo "Error: Traefik env file not found at $ENV_FILE"
   exit 1
 fi
-source "$ENV_FILE"
+# Load Traefik configuration variables
+env | grep TRAEFIK_
+# We won't source to avoid polluting script namespace
 
-# Required variables
+# Script-specific variables (must be set in the shell or another env file)
 : "${TRAEFIK_CONTAINER_NAME:?TRAEFIK_CONTAINER_NAME must be set}"
 : "${TRAEFIK_IMAGE:?TRAEFIK_IMAGE must be set}"
 : "${TRAEFIK_NETWORK:?TRAEFIK_NETWORK must be set}"
-: "${TRAEFIK_WEB_PORT:?TRAEFIK_WEB_PORT must be set}"
-: "${TRAEFIK_WEBSECURE_PORT:?TRAEFIK_WEBSECURE_PORT must be set}"
-: "${TRAEFIK_METRICS_PORT:?TRAEFIK_METRICS_PORT must be set}"
-: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL:?ACME email must be set}"
+: "${TRAEFIK_DASHBOARD_PORT:?TRAEFIK_DASHBOARD_PORT must be set}"
 
-# Determine if DNS-01 should be enabled (both vars must be set)
-DNS_ENABLED=false
-if [[ -n "$TRAEFIK_DNS_PROVIDER" && -n "$TRAEFIK_DNS_API_TOKEN" ]]; then
-  DNS_ENABLED=true
-fi
+# Create Docker network if it doesn't exist
+docker network create "$TRAEFIK_NETWORK" 2>/dev/null || true
 
-# Create Docker network if needed
-docker network create "$TRAEFIK_NETWORK" 2>/dev/null || \
-  echo "Network '$TRAEFIK_NETWORK' already exists."
-
-# Prepare acme.json for Let's Encrypt storage
+# Prepare ACME storage
 touch "$SCRIPT_DIR/acme.json"
 chmod 600 "$SCRIPT_DIR/acme.json"
 
-# Clean up any existing container
-if docker ps -q -f name="$TRAEFIK_CONTAINER_NAME" | grep -q .; then
-  docker stop "$TRAEFIK_CONTAINER_NAME"
-  docker rm   "$TRAEFIK_CONTAINER_NAME"
-fi
+# Remove any existing container
+docker rm -f "$TRAEFIK_CONTAINER_NAME" 2>/dev/null || true
 
 # Pull the Traefik image
 docker pull "$TRAEFIK_IMAGE"
 
-# Build docker run command arguments
-DOCKER_CMD=(docker run -d
-  --name "$TRAEFIK_CONTAINER_NAME"
-  --restart always
-  --network "$TRAEFIK_NETWORK"
-  --env-file "$ENV_FILE"
-  --health-cmd "curl -f http://localhost:8080/ping || exit 1"
-  --health-interval=30s
-  --health-retries=3
-  --health-timeout=10s
-  --health-start-period=10s
-  -p "$TRAEFIK_WEB_PORT":80
-  -p "$TRAEFIK_WEBSECURE_PORT":443
-  -p "$TRAEFIK_METRICS_PORT":9100
-  -p "$TRAEFIK_DASHBOARD_PORT":8080
-  -v /var/run/docker.sock:/var/run/docker.sock:ro
-  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json:ro
-  -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro
-  -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro
-)
+# Run Traefik container with unified env and mounts
+docker run -d \
+  --name "$TRAEFIK_CONTAINER_NAME" \
+  --restart always \
+  --network "$TRAEFIK_NETWORK" \
+  --env-file "$ENV_FILE" \
+  -p 80:80 \
+  -p 443:443 \
+  -p 9100:9100 \
+  -p "$TRAEFIK_DASHBOARD_PORT":8083 \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json:ro \
+  -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro \
+  -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro \
+  "$TRAEFIK_IMAGE"
 
-# Conditionally mount DNS-01 config if enabled
-if [[ "$DNS_ENABLED" == true ]]; then
-  DOCKER_CMD+=(
-    -v "$SCRIPT_DIR/dns.yml":/etc/traefik/dns.yml:ro
-  )
-  echo "DNS-01 challenge enabled via provider: $TRAEFIK_DNS_PROVIDER"
-else
-  echo "Skipping DNS-01 challenge (TRAEFIK_DNS_PROVIDER or API token not set)"
-fi
-
-# Append the image to the command
-DOCKER_CMD+=("$TRAEFIK_IMAGE")
-
-# Execute deployment
-echo "Running: ${DOCKER_CMD[*]}"
-"${DOCKER_CMD[@]}"
-
-# Summary output
-echo "Traefik deployed: $TRAEFIK_CONTAINER_NAME"
-echo "Dashboard: http://localhost:8080"
-echo "Metrics: http://localhost:$TRAEFIK_METRICS_PORT/metrics"
-echo "Web (HTTP): port $TRAEFIK_WEB_PORT"
-echo "Websecure (HTTPS): port $TRAEFIK_WEBSECURE_PORT"
+# Display deployment info
+echo "Traefik deployed as container '$TRAEFIK_CONTAINER_NAME'"
+echo "Dashboard available at http://<host>:$TRAEFIK_DASHBOARD_PORT"
+echo "Metrics at http://<host>:9100/metrics"
+echo "HTTP  : http://<host>:80"
+echo "HTTPS : https://<host>"
