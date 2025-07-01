@@ -5,8 +5,8 @@
 # ======================================================================
 # Implements:
 #   1. Dynamic HTTP→HTTPS redirects via redirect.yml (excluding ACME paths)
-#   2. DNS‑01 challenge fallback via dns.yml and env vars
-#   3. Docker labels on services (note: apply labels in each service’s compose/docker run)
+#   2. DNS-01 challenge fallback via dns.yml (optional)
+#   3. Docker labels on services (apply in your service definitions)
 #   4. Health checks to auto-restart Traefik if unhealthy
 
 # Ensure script-relative paths
@@ -31,8 +31,12 @@ source "$ENV_FILE"
 : "${TRAEFIK_WEBSECURE_PORT:?}"                 # HTTPS port (host)
 : "${TRAEFIK_METRICS_PORT:?}"                   # Prometheus metrics port (host)
 : "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL:?}"  # ACME email
-: "${TRAEFIK_DNS_PROVIDER:?}"                   # DNS-01 provider name (e.g., cloudflare)
-: "${TRAEFIK_DNS_API_TOKEN:?}"                  # DNS-01 API token
+
+# DNS-01 variables are optional; if unset, DNS-01 is skipped
+DNS_ENABLED=false
+if [[ -n "$TRAEFIK_DNS_PROVIDER" && -n "$TRAEFIK_DNS_API_TOKEN" ]]; then
+  DNS_ENABLED=true
+fi
 
 # Create Docker network if needed
 docker network create "$TRAEFIK_NETWORK" 2>/dev/null || \
@@ -51,27 +55,42 @@ fi
 # Pull the Traefik image
 docker pull "$TRAEFIK_IMAGE"
 
-# Deploy Traefik container
-docker run -d \
-  --name "$TRAEFIK_CONTAINER_NAME" \
-  --restart always \
-  --network "$TRAEFIK_NETWORK" \
-  --env-file "$ENV_FILE" \
-  --health-cmd="curl -f http://localhost:8080/ping || exit 1" \
-  --health-interval=30s \
-  --health-retries=3 \
-  --health-timeout=10s \
-  --health-start-period=10s \
-  -p "$TRAEFIK_WEB_PORT":80 \
-  -p "$TRAEFIK_WEBSECURE_PORT":443 \
-  -p "$TRAEFIK_METRICS_PORT":9100 \
-  -p 8080:8080 \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json \
-  -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro \
-  -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro \
-  -v "$SCRIPT_DIR/dns.yml":/etc/traefik/dns.yml:ro \
-  "$TRAEFIK_IMAGE"
+# Build docker run command
+DOCKER_CMD=(docker run -d
+  --name "$TRAEFIK_CONTAINER_NAME"
+  --restart always
+  --network "$TRAEFIK_NETWORK"
+  --env-file "$ENV_FILE"
+  --health-cmd="curl -f http://localhost:8080/ping || exit 1"
+  --health-interval=30s
+  --health-retries=3
+  --health-timeout=10s
+  --health-start-period=10s
+  -p "$TRAEFIK_WEB_PORT":80
+  -p "$TRAEFIK_WEBSECURE_PORT":443
+  -p "$TRAEFIK_METRICS_PORT":9100
+  -p 8080:8080
+  -v /var/run/docker.sock:/var/run/docker.sock:ro
+  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json
+  -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro
+  -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro
+)
+
+# Conditionally mount DNS-01 config\if [[ "$DNS_ENABLED" == true ]]; then
+  DOCKER_CMD+=(
+    -v "$SCRIPT_DIR/dns.yml":/etc/traefik/dns.yml:ro
+  )
+  echo "DNS-01 challenge enabled via provider: $TRAEFIK_DNS_PROVIDER"
+else
+  echo "Skipping DNS-01 challenge (TRAEFIK_DNS_PROVIDER or API token not set)"
+fi
+
+# Finally, add image to command
+DOCKER_CMD+=("$TRAEFIK_IMAGE")
+
+# Execute deployment
+echo "Running: ${DOCKER_CMD[*]}"
+"${DOCKER_CMD[@]}"
 
 # Summary
 echo "Traefik deployed: $TRAEFIK_CONTAINER_NAME"
