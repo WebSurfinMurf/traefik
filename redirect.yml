@@ -1,0 +1,46 @@
+http:
+  routers:
+    # 1) ACME challenge passthrough
+    acme-challenge-router:
+      rule: "PathPrefix(`/.well-known/acme-challenge`)"
+      entryPoints:
+        - web
+      service: noop@internal
+
+    # 2) Public hostname → HTTPS
+    redirect-router:
+      rule: "Host(`embracenow.asuscomm.com`)"
+      entryPoints:
+        - web
+      middlewares:
+        - https-redirect
+      service: noop@internal
+
+    # 3) Internal HTTP for Keycloak (LAN only + strip HSTS)
+    keycloak-internal-http:
+      rule: "Host(`keycloak.linuxserver.lan`)"
+      entryPoints:
+        - web
+      service: keycloak-service
+      middlewares:
+        - internal-whitelist
+        - strip-hsts
+
+  middlewares:
+    # a) standard HTTPS redirect
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    # b) only allow LAN clients
+    internal-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "192.168.1.0/24"
+
+    # c) remove Keycloak’s HSTS header
+    strip-hsts:
+      headers:
+        removeResponseHeaders:
+          - Strict-Transport-Security
