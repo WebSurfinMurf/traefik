@@ -34,7 +34,7 @@ source "$ENV_FILE"
 
 # Determine if DNS-01 should be enabled (both vars must be set)
 DNS_ENABLED=false
-if [[ -n "$TRAEFIK_DNS_PROVIDER" ]] && [[ -n "$TRAEFIK_DNS_API_TOKEN" ]]; then
+if [[ -n "$TRAEFIK_DNS_PROVIDER" && -n "$TRAEFIK_DNS_API_TOKEN" ]]; then
   DNS_ENABLED=true
 fi
 
@@ -48,36 +48,37 @@ chmod 600 "$SCRIPT_DIR/acme.json"
 
 # Clean up any existing container
 if docker ps -q -f name="$TRAEFIK_CONTAINER_NAME" | grep -q .; then
-  docker rm -f "$TRAEFIK_CONTAINER_NAME"
+  docker stop "$TRAEFIK_CONTAINER_NAME"
+  docker rm   "$TRAEFIK_CONTAINER_NAME"
 fi
 
 # Pull the Traefik image
 docker pull "$TRAEFIK_IMAGE"
 
 # Build docker run command arguments
-DOCKER_CMD=(docker run -d \
-  --name "$TRAEFIK_CONTAINER_NAME" \
-  --restart always \
-  --network "$TRAEFIK_NETWORK" \
-  --env-file "$ENV_FILE" \
-  --health-cmd="curl -f http://localhost:8080/ping || exit 1" \
-  --health-interval=30s \
-  --health-retries=3 \
-  --health-timeout=10s \
-  --health-start-period=10s \
-  -p "$TRAEFIK_WEB_PORT":80 \
-  -p "$TRAEFIK_WEBSECURE_PORT":443 \
-  -p "$TRAEFIK_METRICS_PORT":9100 \
-  -p 8080:8080 \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json:ro \
-  -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro \
+DOCKER_CMD=(docker run -d
+  --name "$TRAEFIK_CONTAINER_NAME"
+  --restart always
+  --network "$TRAEFIK_NETWORK"
+  --env-file "$ENV_FILE"
+  --health-cmd "curl -f http://localhost:8080/ping || exit 1"
+  --health-interval=30s
+  --health-retries=3
+  --health-timeout=10s
+  --health-start-period=10s
+  -p "$TRAEFIK_WEB_PORT":80
+  -p "$TRAEFIK_WEBSECURE_PORT":443
+  -p "$TRAEFIK_METRICS_PORT":9100
+  -p "$TRAEFIK_DASHBOARD_PORT":8080
+  -v /var/run/docker.sock:/var/run/docker.sock:ro
+  -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json:ro
+  -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro
   -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro
 )
 
 # Conditionally mount DNS-01 config if enabled
 if [[ "$DNS_ENABLED" == true ]]; then
-  DOCKER_CMD+=( \
+  DOCKER_CMD+=(
     -v "$SCRIPT_DIR/dns.yml":/etc/traefik/dns.yml:ro
   )
   echo "DNS-01 challenge enabled via provider: $TRAEFIK_DNS_PROVIDER"
