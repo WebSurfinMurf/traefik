@@ -1,5 +1,3 @@
-# traefik.yml
-
 # Global log level
 log:
   level: INFO
@@ -15,24 +13,15 @@ metrics:
     entryPoint: metrics
     addEntryPointsLabels: true
 
-# Entrypoints
-entryPoints:
+# Entrypoints\entryPoints:
   web:
     address: ":80"
-    # This block creates a global, permanent redirect from HTTP to HTTPS
-    http:
-      redirections:
-        entryPoint:
-          to: websecure
-          scheme: https
-          permanent: true
   websecure:
     address: ":443"
   metrics:
     address: ":9100"
 
-# Providers
-providers:
+# Providers\providers:
   docker:
     exposedByDefault: false
     network: traefik-proxy
@@ -41,7 +30,8 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      storage: /acme.json
+      email: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL}"
+      storage: "/etc/traefik/acme.json"
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
         entryPoint: web
