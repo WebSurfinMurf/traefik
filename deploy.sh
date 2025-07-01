@@ -39,8 +39,9 @@ fi
 source "$ENV_FILE"
 
 # Check for essential variables within the script
-if [ -z "$TRAEFIK_CONTAINER_NAME" ] || [ -z "$TRAEFIK_IMAGE" ] || [ -z "$TRAEFIK_WEB_PORT" ] || [ -z "$TRAEFIK_WEBSECURE_PORT" ] || [ -z "$TRAEFIK_METRICS_PORT" ] || [ -z "$ACME_EMAIL" ]; then
+if [ -z "$TRAEFIK_CONTAINER_NAME" ] || [ -z "$TRAEFIK_IMAGE" ] || [ -z "$TRAEFIK_WEB_PORT" ] || [ -z "$TRAEFIK_WEBSECURE_PORT" ] || [ -z "$TRAEFIK_METRICS_PORT" ] || [ -z "$TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL" ]; then
     echo "Error: One or more essential environment variables are not set in $ENV_FILE."
+    echo "Please ensure TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL is defined."
     exit 1
 fi
 
@@ -98,4 +99,3 @@ echo "Metrics (Prometheus): http://localhost:$TRAEFIK_METRICS_PORT/metrics"
 echo "Web Entrypoint (HTTP): Port $TRAEFIK_WEB_PORT"
 echo "Websecure Entrypoint (HTTPS): Port $TRAEFIK_WEBSECURE_PORT"
 echo "-----------------------------------------"
-
