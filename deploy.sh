@@ -3,9 +3,8 @@
 # ======================================================================
 # Traefik Deployment Script (Single Env File)
 # ======================================================================
-# Reads both Traefik static config and script-specific settings
-# from one unified .env, computes host ports from entrypoint vars,
-# and runs the Traefik Docker container.
+# Reads Traefik static config and script-specific settings
+# from a unified .env, computes host ports, and runs the Traefik container.
 
 # Ensure script-relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,17 +19,23 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
-# Load all variables from the env file into the shell
+# Export all variables from env file
 set -o allexport
 source "$ENV_FILE"
 set +o allexport
 
-# Required script-specific variables
-: "${TRAEFIK_CONTAINER_NAME:?TRAEFIK_CONTAINER_NAME must be set in env file}"
-: "${TRAEFIK_IMAGE:?TRAEFIK_IMAGE must be set in env file}"
-: "${TRAEFIK_NETWORK:?TRAEFIK_NETWORK must be set in env file}"
+# Required variables validation
+: "${TRAEFIK_CONTAINER_NAME:?TRAEFIK_CONTAINER_NAME must be set}
+: "${TRAEFIK_IMAGE:?TRAEFIK_IMAGE must be set}"
+: "${TRAEFIK_NETWORK:?TRAEFIK_NETWORK must be set}"
+: "${TRAEFIK_PROVIDERS_DOCKER_NETWORK:?TRAEFIK_PROVIDERS_DOCKER_NETWORK must be set}"
+: "${TRAEFIK_ENTRYPOINTS_WEB_ADDRESS:?TRAEFIK_ENTRYPOINTS_WEB_ADDRESS must be set}"
+: "${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS:?TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS must be set}"
+: "${TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS:?TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS must be set}"
+: "${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS:?TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS must be set}"
+: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL:?ACME email must be set}"
 
-# Derive host ports by stripping leading colon
+# Derive host ports by stripping leading ':'
 HTTP_PORT="${TRAEFIK_ENTRYPOINTS_WEB_ADDRESS#:}"
 HTTPS_PORT="${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS#:}"
 METRICS_PORT="${TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS#:}"
@@ -39,17 +44,16 @@ DASHBOARD_PORT="${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS#:}"
 # Create Docker network if needed
 docker network create "$TRAEFIK_NETWORK" 2>/dev/null || true
 
-# Prepare acme.json for Let's Encrypt storage
+# Prepare acme.json storage
 touch "$SCRIPT_DIR/acme.json" && chmod 600 "$SCRIPT_DIR/acme.json"
 
-# Remove any existing container
+# Remove old container if exists
 docker rm -f "$TRAEFIK_CONTAINER_NAME" 2>/dev/null || true
 
 # Pull the Traefik image
 docker pull "$TRAEFIK_IMAGE"
 
-# --providers.docker.network=traefik-proxy \
-# Run the Traefik container
+# Run Traefik container
 docker run -d \
   --name "$TRAEFIK_CONTAINER_NAME" \
   --restart=always \
@@ -65,7 +69,7 @@ docker run -d \
   -v "$SCRIPT_DIR/redirect.yml":/etc/traefik/redirect.yml:ro \
   "$TRAEFIK_IMAGE"
 
-# Summary
+# Summary output
 echo "Traefik deployed as '$TRAEFIK_CONTAINER_NAME'"
 echo "HTTP      : http://<host>:$HTTP_PORT"
 echo "HTTPS     : https://<host>:$HTTPS_PORT"
