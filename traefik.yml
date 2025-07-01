@@ -34,8 +34,7 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      # The email is now read directly from the environment file by the container
-      email: ${ACME_EMAIL} 
+      # The email is now provided by an environment variable, so this line is removed.
       storage: /acme.json
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
