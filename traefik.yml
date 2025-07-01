@@ -18,20 +18,20 @@ metrics:
 ## Entrypoints
 entryPoints:
   web:
-    address: "${TRAEFIK_ENTRYPOINTS_WEB_ADDRESS}"
+    address: ":80"
   websecure:
-    address: "${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS}"
+    address: ":443"
   metrics:
-    address: "${TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS}"
+    address: ":9100"
   traefik:
-    address: "${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS}"
+    address: ":8083"
 
 ## Providers
 providers:
   docker:
-    endpoint: "${TRAEFIK_PROVIDERS_DOCKER_ENDPOINT}"
-    exposedByDefault: ${TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT}
-    network: "${TRAEFIK_PROVIDERS_DOCKER_NETWORK}"
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: "traefik-proxy"
   file:
     filename: /etc/traefik/redirect.yml
     watch: true
@@ -40,7 +40,7 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL}"
-      storage: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE}"
+      email: "websurfinmurf@gmail.com"
+      storage: "/etc/traefik/acme.json"
       httpChallenge:
-        entryPoint: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE_ENTRYPOINT}"
+        entryPoint: web
