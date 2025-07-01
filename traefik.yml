@@ -1,37 +1,46 @@
-# Global log level
+# traefik.yml
+
+## Global Logging
 log:
   level: INFO
 
-# API and Dashboard
+## API & Dashboard
 api:
-  insecure: true
   dashboard: true
+  insecure: true
 
-# Metrics (Prometheus)
+## Metrics (Prometheus)
 metrics:
   prometheus:
     entryPoint: metrics
     addEntryPointsLabels: true
 
-# Entrypoints\entryPoints:
+## Entrypoints
+entryPoints:
   web:
-    address: ":80"
+    address: "${TRAEFIK_ENTRYPOINTS_WEB_ADDRESS}"
   websecure:
-    address: ":443"
+    address: "${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS}"
   metrics:
-    address: ":9100"
+    address: "${TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS}"
+  traefik:
+    address: "${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS}"
 
-# Providers\providers:
+## Providers
+providers:
   docker:
-    exposedByDefault: false
-    network: traefik-proxy
+    endpoint: "${TRAEFIK_PROVIDERS_DOCKER_ENDPOINT}"
+    exposedByDefault: ${TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT}
+    network: "${TRAEFIK_PROVIDERS_DOCKER_NETWORK}"
+  file:
+    filename: /etc/traefik/redirect.yml
+    watch: true
 
-# Certificate Resolvers (Let's Encrypt)
+## Certificate Resolvers (Let's Encrypt)
 certificatesResolvers:
   letsencrypt:
     acme:
       email: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL}"
-      storage: "/etc/traefik/acme.json"
-      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      storage: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE}"
       httpChallenge:
-        entryPoint: web
+        entryPoint: "${TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE_ENTRYPOINT}"
