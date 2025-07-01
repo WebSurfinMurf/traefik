@@ -2,7 +2,7 @@
 
 # Global log level
 log:
-  level: ${TRAEFIK_LOG_LEVEL:-INFO} # Use variable from .env, default to INFO
+  level: INFO # Set log level directly
 
 # API and Dashboard
 api:
@@ -28,13 +28,14 @@ entryPoints:
 providers:
   docker:
     exposedByDefault: false # Recommended to explicitly enable services
-    network: ${TRAEFIK_NETWORK:-traefik-proxy} # Use variable from .env
+    network: traefik-proxy # Network for Traefik to watch
 
 # Certificate Resolvers (Let's Encrypt)
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: ${ACME_EMAIL} # Variable from .env file
+      # The email is now read directly from the environment file by the container
+      email: ${ACME_EMAIL} 
       storage: /acme.json
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
