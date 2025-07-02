@@ -1,0 +1,56 @@
+# traefik.yml
+
+########## GLOBAL SETTINGS ##########
+log:
+  level: INFO  # Log level: DEBUG, INFO, WARN, ERROR
+
+########## API & DASHBOARD ##########
+api:
+  dashboard: true
+  insecure: true  # Exposes dashboard on an entrypoint without auth (for testing)
+
+########## METRICS ##########
+metrics:
+  prometheus:
+    entryPoint: metrics
+    addEntryPointsLabels: true  # Label metrics with entryPoint info
+
+########## ENTRYPOINTS ##########
+entryPoints:
+  web:
+    address: ":80"  # HTTP
+  websecure:
+    address: ":443"  # HTTPS
+  metrics:
+    address: ":9100"  # Prometheus metrics
+  traefik:
+    address: ":8083"  # Dashboard/API
+
+########## PROVIDERS ##########
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"  # Docker socket
+    exposedByDefault: false  # Only containers with explicit label are exposed
+    network: "traefik-proxy"  # Only watch this network
+
+  file:
+    filename: /etc/traefik/redirect.yml  # Dynamic redirect rules
+    watch: true  # Reload when file changes
+
+########## CERTIFICATE RESOLVERS ##########
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "websurfinmurf@gmail.com"  # Your email for Let's Encrypt registration
+      storage: "/etc/traefik/acme.json"  # Certificate storage file
+      httpChallenge:
+        entryPoint: web  # Use HTTP challenge on port 80
+
+########## OPTIONAL: TLS OPTIONS ##########
+# tls:
+#   options:
+#     default:
+#       minVersion: VersionTLS12
+#       cipherSuites:
+#         - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+#         - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
