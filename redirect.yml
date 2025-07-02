@@ -16,16 +16,18 @@ http:
         - https-redirect
       service: noop@internal
 
-    # 3) Internal HTTP for Keycloak (LAN only + strip HSTS)
+
+    # 3) Internal HTTP for Keycloak under /keycloak
     keycloak-internal-http:
-      rule: "Host(`keycloak.linuxserver.lan`)"
+      rule: "Host(`linuxserver.lan`) && PathPrefix(`/keycloak`)"
       entryPoints:
         - web
       service: keycloak-service
       middlewares:
         - internal-whitelist
         - strip-hsts
-
+        - keycloak-stripprefix
+    
   middlewares:
     # a) standard HTTPS redirect
     https-redirect:
@@ -44,3 +46,9 @@ http:
       headers:
         removeResponseHeaders:
           - Strict-Transport-Security
+
+    # d) strip the /keycloak prefix before forwarding to KC
+    keycloak-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/keycloak"
