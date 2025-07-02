@@ -40,13 +40,13 @@ http:
         sourceRange:
           - "192.168.1.0/24"
 
-    # c) remove Keycloak’s HSTS header (v3 field name)
+    # c) remove Keycloak’s HSTS header (v3 field name!)
     strip-hsts:
       headers:
         removeResponseHeader:
           - Strict-Transport-Security
 
-    # d) strip the /keycloak prefix before forwarding to Keycloak
+    # d) strip /keycloak before forwarding
     keycloak-stripprefix:
       stripPrefix:
         prefixes:
