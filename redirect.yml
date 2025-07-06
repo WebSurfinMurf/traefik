@@ -62,7 +62,7 @@ http:
     # c) remove Keycloak’s HSTS header
     strip-hsts:
       headers:
-        removeResponseHeader:
+        removeResponseHeaders:
           - Strict-Transport-Security
 
     # d) strip /keycloak before forwarding to Keycloak
