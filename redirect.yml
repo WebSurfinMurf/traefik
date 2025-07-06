@@ -16,15 +16,35 @@ http:
         - https-redirect
       service: noop@internal
 
-    # 3) Internal HTTP for Keycloak (LAN only + strip HSTS)
+    # 3) Internal HTTP for Keycloak under /keycloak
     keycloak-internal-http:
-      rule: "Host(`keycloak.linuxserver.lan`)"
+      rule: "Host(`linuxserver.lan`) && PathPrefix(`/keycloak`)"
       entryPoints:
         - web
       service: keycloak-service
       middlewares:
         - internal-whitelist
         - strip-hsts
+        - keycloak-stripprefix
+
+    # 4) Public HTTPS for Keycloak under /keycloak
+    keycloak-secure:
+      rule: "Host(`embracenow.asuscomm.com`) && PathPrefix(`/keycloak`)"
+      entryPoints:
+        - websecure
+      tls: {}
+      service: keycloak-service
+      middlewares:
+        - keycloak-stripprefix
+
+    # 5) Public HTTPS for the Traefik dashboard under /traefik
+    traefik-dashboard:
+      rule: "Host(`embracenow.asuscomm.com`) && PathPrefix(`/traefik`)"
+      entryPoints:
+        - websecure
+      service: api@internal
+      middlewares:
+        - strip-traefik
 
   middlewares:
     # a) standard HTTPS redirect
@@ -42,5 +62,17 @@ http:
     # c) remove Keycloak’s HSTS header
     strip-hsts:
       headers:
-        removeResponseHeaders:
+        removeResponseHeader:          # <— singular for Traefik v3
           - Strict-Transport-Security
+
+    # d) strip /keycloak before forwarding to Keycloak
+    keycloak-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/keycloak"
+
+    # e) strip /traefik before forwarding to Traefik’s API/dashboard
+    strip-traefik:
+      stripPrefix:
+        prefixes:
+          - "/traefik"
