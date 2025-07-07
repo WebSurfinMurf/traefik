@@ -9,7 +9,7 @@ http:
 
     # 2) Public hostname → HTTPS redirect
     redirect-router:
-      rule: "Host(`embracenow.asuscomm.com`)"
+      rule: "Host(`ai-servicers.com`)"
       entryPoints:
         - web
       middlewares:
