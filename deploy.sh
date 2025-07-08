@@ -35,6 +35,13 @@ HTTPS_PORT="${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS#:}"
 METRICS_PORT="${TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS#:}"
 DASHBOARD_PORT="${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS#:}"
 
+# Compute host ports for Mailu
+SMTP_PORT="${TRAEFIK_ENTRYPOINTS_SMTP_ADDRESS#:}"
+SMTPS_PORT="${TRAEFIK_ENTRYPOINTS_SMTPS_ADDRESS#:}"
+SUBMISSION_PORT="${TRAEFIK_ENTRYPOINTS_SUBMISSION_ADDRESS#:}"
+IMAP_PORT="${TRAEFIK_ENTRYPOINTS_IMAP_ADDRESS#:}"
+IMAPS_PORT="${TRAEFIK_ENTRYPOINTS_IMAPS_ADDRESS#:}"
+
 # Create Docker network if it doesn't exist
 docker network create "$TRAEFIK_NETWORK" 2>/dev/null || true
 
@@ -57,6 +64,11 @@ docker run -d \
   -p "$HTTPS_PORT":443 \
   -p "$METRICS_PORT":9100 \
   -p "$DASHBOARD_PORT":8083 \
+  -p "$SMTP_PORT":25 \
+  -p "$SMTPS_PORT":465 \
+  -p "$SUBMISSION_PORT":587 \
+  -p "$IMAP_PORT":143 \
+  -p "$IMAPS_PORT":993 \  
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json:rw \
   -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro \
