@@ -68,7 +68,7 @@ docker run -d \
   -p "$SMTPS_PORT":465 \
   -p "$SUBMISSION_PORT":587 \
   -p "$IMAP_PORT":143 \
-  -p "$IMAPS_PORT":993 \  
+  -p "$IMAPS_PORT":993 \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v "$SCRIPT_DIR/acme.json":/etc/traefik/acme.json:rw \
   -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro \
