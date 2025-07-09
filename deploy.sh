@@ -94,6 +94,7 @@ docker run -d \
   "$CERTS_DUMPER_IMAGE" \
   file \
   --version v3 \
+  --domain-subdir \
   --source /traefik/acme.json \
   --dest /certs \
   --watch
