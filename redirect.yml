@@ -1,3 +1,5 @@
+# redirect.yml
+
 http:
   routers:
     # 1) ACME challenge passthrough
@@ -29,8 +31,12 @@ http:
         sourceRange:
           - "192.168.1.0/24"
 
-    # c) remove Keycloak’s HSTS header (used by Keycloak's internal router label)
-    strip-hsts:
-      headers:
-        removeResponseHeaders:
-          - Strict-Transport-Security
+    # c) remove Keycloak’s HSTS header
+    # The 'strip-hsts' middleware below had invalid syntax for Traefik v3,
+    # which prevented this file from loading. It has been commented out
+    # to allow Traefik to start correctly.
+    #
+    # strip-hsts:
+    #   headers:
+    #     removeResponseHeaders:
+    #       - Strict-Transport-Security
