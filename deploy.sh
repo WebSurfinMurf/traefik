@@ -93,6 +93,7 @@ docker run -d \
   -v "$TRAEFIK_CERTS_DUMP_PATH":/certs \
   "$CERTS_DUMPER_IMAGE" \
   file \
+  --version v3 \
   --source /traefik/acme.json \
   --dest /certs \
   --watch
