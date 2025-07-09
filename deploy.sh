@@ -93,8 +93,8 @@ docker run -d \
   -v "$TRAEFIK_CERTS_DUMP_PATH":/certs \
   "$CERTS_DUMPER_IMAGE" \
   file \
-  --source.path /traefik/acme.json \
-  --dest.path /certs \
+  --source /traefik/acme.json \
+  --dest /certs \
   --watch
 
 # --- Summary ---
