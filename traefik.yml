@@ -1,4 +1,4 @@
-# traefik.yml - Updated for Cloudflare DNS Challenge
+# traefik.yml - Updated for Cloudflare DNS Challenge & Mailu TCP Entrypoints
 
 ########## GLOBAL SETTINGS ##########
 log:
@@ -25,6 +25,15 @@ entryPoints:
     address: ":9100"
   traefik:
     address: ":8083"
+  # TCP Entrypoints for Mailu
+  smtp:
+    address: ":25"
+  smtps:
+    address: ":465"
+  submission:
+    address: ":587"
+  imaps:
+    address: ":993"
 
 ########## PROVIDERS ##########
 providers:
