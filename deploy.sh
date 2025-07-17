@@ -69,14 +69,14 @@ docker run -d \
   --restart=always \
   --network="$TRAEFIK_NETWORK" \
   --env-file="$ENV_FILE" \
-  -p "$HTTP_PORT":80 \
-  -p "$HTTPS_PORT":443 \
-  -p "$DASHBOARD_PORT":8083 \
-  -p "$METRICS_PORT":9100 \
-  -p "$SMTP_PORT":25 \
-  -p "$SMTPS_PORT":465 \
-  -p "$SUBMISSION_PORT":587 \
-  -p "$IMAPS_PORT":993 \
+  -p "${TRAEFIK_ENTRYPOINTS_WEB_ADDRESS#:}:80" \
+  -p "${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS#:}:443" \
+  -p "${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS#:}:8083" \
+  -p "${TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS#:}:9100" \
+  -p "${TRAEFIK_ENTRYPOINTS_SMTP_ADDRESS#:}:25" \
+  -p "${TRAEFIK_ENTRYPOINTS_SMTPS_ADDRESS#:}:465" \
+  -p "${TRAEFIK_ENTRYPOINTS_SUBMISSION_ADDRESS#:}:587" \
+  -p "${TRAEFIK_ENTRYPOINTS_IMAPS_ADDRESS#:}:993" \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v "$TRAEFIK_ACME_FILE_PATH":/etc/traefik/acme.json:rw \
   -v "$SCRIPT_DIR/traefik.yml":/etc/traefik/traefik.yml:ro \
