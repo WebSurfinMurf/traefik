@@ -1,0 +1,59 @@
+# traefik.yml - Updated for Cloudflare DNS Challenge & Mailu TCP Entrypoints
+
+########## GLOBAL SETTINGS ##########
+log:
+  level: INFO
+
+########## API & DASHBOARD ##########
+api:
+  dashboard: true
+  insecure: true
+
+########## METRICS ##########
+metrics:
+  prometheus:
+    entryPoint: metrics
+    addEntryPointsLabels: true
+
+########## ENTRYPOINTS ##########
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+  metrics:
+    address: ":9100"
+  traefik:
+    address: ":8083"
+  # TCP Entrypoints for Mailu
+  smtp:
+    address: ":25"
+  smtps:
+    address: ":465"
+  submission:
+    address: ":587"
+  imaps:
+    address: ":993"
+
+########## PROVIDERS ##########
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: "traefik-proxy"
+
+  file:
+    filename: /etc/traefik/redirect.yml
+    watch: true
+
+########## CERTIFICATE RESOLVERS (Updated for DNS Challenge) ##########
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "websurfinmurf@gmail.com"
+      storage: "/etc/traefik/acme.json"
+      # This section tells Traefik to use the DNS challenge with Cloudflare
+      dnsChallenge:
+        provider: cloudflare
+        # A delay is sometimes needed for DNS records to propagate
+        delayBeforeCheck: 60

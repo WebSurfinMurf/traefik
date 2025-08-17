@@ -1,0 +1,42 @@
+# redirect.yml
+
+http:
+  routers:
+    # 1) ACME challenge passthrough
+    acme-challenge-router:
+      rule: "PathPrefix(`/.well-known/acme-challenge`)"
+      entryPoints:
+        - web
+      service: noop@internal
+
+    # 2) Public hostname → HTTPS redirect
+    redirect-router:
+      rule: "Host(`ai-servicers.com`)"
+      entryPoints:
+        - web
+      middlewares:
+        - https-redirect
+      service: noop@internal
+
+  middlewares:
+    # a) standard HTTPS redirect
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    # b) only allow LAN clients
+    internal-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "192.168.1.0/24"
+
+    # c) remove Keycloak’s HSTS header
+    # The 'strip-hsts' middleware below had invalid syntax for Traefik v3,
+    # which prevented this file from loading. It has been commented out
+    # to allow Traefik to start correctly.
+    #
+    # strip-hsts:
+    #   headers:
+    #     removeResponseHeaders:
+    #       - Strict-Transport-Security
