@@ -30,3 +30,7 @@ _This section is updated by Claude during each session_
 
 ## Common Commands
 [List frequently used commands for this project]
+### Session: 2025-08-17 (Session 3)
+- Added comprehensive .gitignore to prevent sensitive file commits
+- acme.json removed from git history for security
+- deploy.sh properly handles acme.json creation with 600 permissions
