@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # Path to the unified environment file
-ENV_FILE="../secrets/traefik.env"
+ENV_FILE="/home/administrator/projects/secrets/traefik.env"
 
 # --- Pre-flight Checks ---
 if [[ ! -f "$ENV_FILE" ]]; then
