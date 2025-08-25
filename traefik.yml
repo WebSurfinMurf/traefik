@@ -25,13 +25,15 @@ entryPoints:
     address: ":9100"
   traefik:
     address: ":8083"
-  # TCP Entrypoints for Mailu
+  # TCP Entrypoints for Mail
   smtp:
     address: ":25"
   smtps:
     address: ":465"
   submission:
     address: ":587"
+  imap:
+    address: ":143"
   imaps:
     address: ":993"
 
