@@ -4,6 +4,9 @@
 log:
   level: INFO
 
+accessLog:
+  bufferingSize: 100
+
 ########## API & DASHBOARD ##########
 api:
   dashboard: true
