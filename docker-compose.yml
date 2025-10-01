@@ -1,0 +1,62 @@
+version: '3.8'
+
+networks:
+  traefik-net:
+    external: true
+
+volumes:
+  traefik-certs:
+    driver: local
+
+services:
+  traefik:
+    image: ${TRAEFIK_IMAGE:-traefik:v3.4}
+    container_name: ${TRAEFIK_CONTAINER_NAME:-traefik}
+    restart: always
+    networks:
+      - traefik-net
+    ports:
+      - "${TRAEFIK_ENTRYPOINTS_WEB_ADDRESS:-:80}:80"
+      - "${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS:-:443}:443"
+      - "${TRAEFIK_ENTRYPOINTS_TRAEFIK_ADDRESS:-:8083}:8083"
+      - "${TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS:-:9100}:9100"
+      - "${TRAEFIK_ENTRYPOINTS_SMTP_ADDRESS:-:25}:25"
+      - "${TRAEFIK_ENTRYPOINTS_SMTPS_ADDRESS:-:465}:465"
+      - "${TRAEFIK_ENTRYPOINTS_SUBMISSION_ADDRESS:-:587}:587"
+      - "${TRAEFIK_ENTRYPOINTS_IMAPS_ADDRESS:-:993}:993"
+    env_file:
+      - /home/administrator/secrets/traefik.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${TRAEFIK_ACME_FILE_PATH:-./acme.json}:/etc/traefik/acme.json:rw
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./redirect.yml:/etc/traefik/redirect.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      # Dashboard
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.ai-servicers.com`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.tls=true"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+
+  traefik-certs-dumper:
+    image: ${CERTS_DUMPER_IMAGE:-ldez/traefik-certs-dumper:v2.8.3}
+    container_name: ${CERTS_DUMPER_CONTAINER_NAME:-traefik-certs-dumper}
+    restart: always
+    networks:
+      - traefik-net
+    volumes:
+      - ${TRAEFIK_ACME_FILE_PATH:-./acme.json}:/traefik/acme.json:ro
+      - ${TRAEFIK_CERTS_DUMP_PATH:-/home/administrator/projects/data/traefik-certs}:/certs
+    command:
+      - file
+      - --version
+      - v3
+      - --domain-subdir
+      - --source
+      - /traefik/acme.json
+      - --dest
+      - /certs
+      - --watch
