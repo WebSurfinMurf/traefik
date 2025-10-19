@@ -64,7 +64,7 @@ docker exec traefik wget -qO- http://localhost:8083/api/http/routers | jq
 
 ## Secrets
 
-**Location**: `/home/administrator/secrets/traefik.env`
+**Location**: `$HOME/projects/secrets/traefik.env`
 
 **Required Variables**:
 ```bash
@@ -213,7 +213,7 @@ docker logs traefik 2>&1 | grep -i error
    docker logs traefik | grep -i challenge
    ```
 
-3. **Check Cloudflare API credentials** in `/home/administrator/secrets/traefik.env`
+3. **Check Cloudflare API credentials** in `$HOME/projects/secrets/traefik.env`
 
 4. **Manual certificate renewal**:
    ```bash
@@ -258,7 +258,7 @@ docker compose up -d
 - `acme.json` - Let's Encrypt certificates
 - `traefik.yml` - Main configuration
 - `redirect.yml` - Redirect rules
-- `/home/administrator/secrets/traefik.env` - Environment variables
+- `$HOME/projects/secrets/traefik.env` - Environment variables
 
 ### Backup Command
 ```bash
@@ -266,7 +266,7 @@ tar -czf traefik-backup-$(date +%Y%m%d).tar.gz \
   acme.json \
   traefik.yml \
   redirect.yml \
-  /home/administrator/secrets/traefik.env
+  $HOME/projects/secrets/traefik.env
 ```
 
 ## Security

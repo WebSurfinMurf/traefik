@@ -25,7 +25,7 @@ services:
       - "${TRAEFIK_ENTRYPOINTS_SUBMISSION_ADDRESS:-:587}:587"
       - "${TRAEFIK_ENTRYPOINTS_IMAPS_ADDRESS:-:993}:993"
     env_file:
-      - /home/administrator/secrets/traefik.env
+      - $HOME/projects/secrets/traefik.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${TRAEFIK_ACME_FILE_PATH:-./acme.json}:/etc/traefik/acme.json:rw

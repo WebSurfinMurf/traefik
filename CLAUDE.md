@@ -11,7 +11,7 @@ Traefik is the primary reverse proxy and load balancer for all services, providi
 - Centralized entry point for all external traffic
 
 ## Network Architecture
-- **Primary Network**: `traefik-proxy` (all web services connect here)
+- **Primary Network**: `traefik-net` (all web services connect here)
 - **Host Ports Exposed**: 
   - 80 (HTTP → redirects to HTTPS)
   - 443 (HTTPS)
@@ -43,12 +43,12 @@ imaps: ":993"        # IMAP over SSL
 
 | Service | Domain | Port | Network | Auth |
 |---------|--------|------|---------|------|
-| **Keycloak** | keycloak.ai-servicers.com | 8080 | traefik-proxy, postgres-net | None |
-| **Nextcloud** | nextcloud.ai-servicers.com | 80 | traefik-proxy, postgres-net, mailserver-net | Keycloak SSO |
-| **Draw.io** | drawio.ai-servicers.com | 4180/8080 | traefik-proxy | OAuth2 Proxy |
-| **PostfixAdmin** | postfixadmin.linuxserver.lan | 80 | traefik-proxy, postgres-net, mailserver-net | Internal only |
-| **Main NGINX** | *.linuxserver.lan | 80 | traefik-proxy | Internal services |
-| **Diagrams NGINX** | diagrams.nginx.ai-servicers.com | 80 | traefik-proxy | Public |
+| **Keycloak** | keycloak.ai-servicers.com | 8080 | traefik-net, postgres-net | None |
+| **Nextcloud** | nextcloud.ai-servicers.com | 80 | traefik-net, postgres-net, mailserver-net | Keycloak SSO |
+| **Draw.io** | drawio.ai-servicers.com | 4180/8080 | traefik-net | OAuth2 Proxy |
+| **PostfixAdmin** | postfixadmin.linuxserver.lan | 80 | traefik-net, postgres-net, mailserver-net | Internal only |
+| **Main NGINX** | *.linuxserver.lan | 80 | traefik-net | Internal services |
+| **Diagrams NGINX** | diagrams.nginx.ai-servicers.com | 80 | traefik-net | Public |
 
 ### TCP Services (Mail Server)
 
@@ -76,7 +76,7 @@ imaps: ":993"        # IMAP over SSL
 
 ### Networks and Their Services
 
-**traefik-proxy** (External access network):
+**traefik-net** (External access network):
 - traefik (router)
 - keycloak (identity provider)
 - nextcloud (file sharing)
@@ -107,7 +107,7 @@ imaps: ":993"        # IMAP over SSL
 ### HTTP Service (Nextcloud)
 ```bash
 --label "traefik.enable=true"
---label "traefik.docker.network=traefik-proxy"
+--label "traefik.docker.network=traefik-net"
 --label "traefik.http.routers.nextcloud.rule=Host(\`nextcloud.ai-servicers.com\`)"
 --label "traefik.http.routers.nextcloud.entrypoints=websecure"
 --label "traefik.http.routers.nextcloud.tls=true"
@@ -136,7 +136,7 @@ imaps: ":993"        # IMAP over SSL
 - **Main Config**: `/home/administrator/projects/traefik/traefik.yml`
 - **Redirect Rules**: `/home/administrator/projects/traefik/redirect.yml`
 - **Deploy Script**: `/home/administrator/projects/traefik/deploy.sh`
-- **Secrets**: `/home/administrator/projects/secrets/traefik.env`
+- **Secrets**: `$HOME/projects/secrets/traefik.env`
 - **Certificates**: `/home/administrator/projects/traefik/acme.json`
 - **Cert Dumps**: `/home/administrator/projects/data/traefik-certs/`
 
