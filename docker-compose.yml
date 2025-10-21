@@ -14,7 +14,8 @@ services:
     container_name: ${TRAEFIK_CONTAINER_NAME:-traefik}
     restart: always
     networks:
-      - traefik-net
+      traefik-net:
+        ipv4_address: 172.25.0.6
     ports:
       - "${TRAEFIK_ENTRYPOINTS_WEB_ADDRESS:-:80}:80"
       - "${TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS:-:443}:443"
