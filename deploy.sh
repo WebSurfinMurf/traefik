@@ -78,6 +78,23 @@ if ! docker compose config > /dev/null 2>&1; then
 fi
 echo -e "${GREEN}✅ docker-compose.yml is valid${NC}"
 
+# Check if Traefik's static IP is already in use
+echo ""
+echo "🔍 Checking for IP conflicts..."
+TRAEFIK_IP="172.25.0.6"
+CONFLICTING_CONTAINER=$(docker network inspect traefik-net --format '{{range .Containers}}{{if eq .IPv4Address "172.25.0.6/16"}}{{.Name}}{{end}}{{end}}' 2>/dev/null || true)
+
+if [ -n "$CONFLICTING_CONTAINER" ] && [ "$CONFLICTING_CONTAINER" != "traefik" ]; then
+    echo -e "${YELLOW}⚠️  IP $TRAEFIK_IP is in use by: $CONFLICTING_CONTAINER${NC}"
+    echo "   Fixing: Reconnecting $CONFLICTING_CONTAINER with automatic IP..."
+    docker network disconnect traefik-net "$CONFLICTING_CONTAINER" 2>/dev/null || true
+    sleep 1
+    docker network connect traefik-net "$CONFLICTING_CONTAINER" 2>/dev/null || true
+    echo -e "${GREEN}✅ IP conflict resolved${NC}"
+else
+    echo -e "${GREEN}✅ No IP conflicts detected${NC}"
+fi
+
 # --- Deployment ---
 echo ""
 echo "🚀 Deploying Traefik services..."
