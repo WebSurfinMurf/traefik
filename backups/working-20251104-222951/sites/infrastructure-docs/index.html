@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Servicers Infrastructure Architecture</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem;
+        }
+
+        /* ===== TYPOGRAPHY ===== */
+        h1 {
+            font-size: 2.5rem;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            margin: 2rem 0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        /* ===== METRIC CARDS ===== */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* ===== FEATURE CARDS ===== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .feature-card ul {
+            list-style: none;
+            color: #4a5568;
+            line-height: 1.8;
+        }
+
+        .feature-card ul li:before {
+            content: "→ ";
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* ===== DIAGRAMS ===== */
+        .diagram-container {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ===== LEGEND ===== */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f7fafc;
+            border-radius: 12px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #2d3748;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .metric-grid,
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <h1>🏗️ AI Servicers Infrastructure</h1>
+        <p class="subtitle">Comprehensive Architecture Documentation - ai-servicers.com</p>
+
+        <!-- KEY METRICS -->
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-value">46</div>
+                <div class="metric-label">Active Projects</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">75</div>
+                <div class="metric-label">Running Containers</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">29</div>
+                <div class="metric-label">Docker Networks</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">64</div>
+                <div class="metric-label">MCP Tools</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">10</div>
+                <div class="metric-label">OAuth2 Protected</div>
+            </div>
+        </div>
+
+        <!-- BUSINESS OBJECTIVES -->
+        <div class="section">
+            <h2 class="section-title">📊 Infrastructure Objectives</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>AI Service Platform</h3>
+                    <ul>
+                        <li>Unified LLM gateway (LiteLLM)</li>
+                        <li>User-friendly interface (Open WebUI)</li>
+                        <li>Multi-agent collaboration (Matrix)</li>
+                        <li>Persistent AI memory (OpenMemory)</li>
+                        <li>LangChain workflow engine</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Security & Authentication</h3>
+                    <ul>
+                        <li>Single Sign-On (Keycloak)</li>
+                        <li>OAuth2 proxy protection</li>
+                        <li>SSL/TLS encryption (Traefik)</li>
+                        <li>Password management (Bitwarden)</li>
+                        <li>Network isolation</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Observability & Monitoring</h3>
+                    <ul>
+                        <li>Log aggregation (Loki)</li>
+                        <li>Metrics visualization (Grafana)</li>
+                        <li>System monitoring (Netdata)</li>
+                        <li>Real-time logs (Dozzle)</li>
+                        <li>Time-series data (TimescaleDB)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SYSTEM ARCHITECTURE -->
+        <div class="section">
+            <h2 class="section-title">🏗️ System Architecture</h2>
+            <div class="diagram-container">
+                <svg viewBox="0 0 1400 1200">
+                    <!-- Title -->
+                    <text x="700" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#2d3748">AI Servicers Infrastructure Architecture</text>
+
+                    <!-- Layer 1: Entry Point -->
+                    <rect x="550" y="80" width="300" height="60" fill="#f59e0b" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="700" y="115" text-anchor="middle" font-size="16" font-weight="bold" fill="white">Traefik Reverse Proxy</text>
+                    <text x="700" y="133" text-anchor="middle" font-size="12" fill="white">SSL/TLS + Routing</text>
+
+                    <!-- Arrow -->
+                    <line x1="700" y1="140" x2="700" y2="170" stroke="#2d3748" stroke-width="2"/>
+                    <polygon points="700,170 695,160 705,160" fill="#2d3748"/>
+
+                    <!-- Layer 2: Security -->
+                    <rect x="100" y="180" width="220" height="60" fill="#9f7aea" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="210" y="208" text-anchor="middle" font-size="14" font-weight="bold" fill="white">Keycloak SSO</text>
+                    <text x="210" y="225" text-anchor="middle" font-size="11" fill="white">Authentication</text>
+
+                    <rect x="350" y="180" width="220" height="60" fill="#9f7aea" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="460" y="208" text-anchor="middle" font-size="14" font-weight="bold" fill="white">OAuth2 Proxies (10)</text>
+                    <text x="460" y="225" text-anchor="middle" font-size="11" fill="white">Service Protection</text>
+
+                    <!-- Arrow -->
+                    <line x1="700" y1="170" x2="700" y2="280" stroke="#2d3748" stroke-width="2"/>
+                    <polygon points="700,280 695,270 705,270" fill="#2d3748"/>
+
+                    <!-- Layer 3: AI Services -->
+                    <text x="700" y="310" text-anchor="middle" font-size="18" font-weight="bold" fill="#2d3748">AI Service Layer</text>
+
+                    <rect x="50" y="330" width="180" height="70" fill="#4299e1" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="140" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="white">Open WebUI</text>
+                    <text x="140" y="375" text-anchor="middle" font-size="11" fill="white">User Interface</text>
+                    <text x="140" y="390" text-anchor="middle" font-size="10" fill="white">Port 8000</text>
+
+                    <rect x="260" y="330" width="180" height="70" fill="#4299e1" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="350" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="white">LiteLLM</text>
+                    <text x="350" y="375" text-anchor="middle" font-size="11" fill="white">LLM Gateway</text>
+                    <text x="350" y="390" text-anchor="middle" font-size="10" fill="white">Port 4000</text>
+
+                    <rect x="470" y="330" width="180" height="70" fill="#4299e1" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="560" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="white">LangChain</text>
+                    <text x="560" y="375" text-anchor="middle" font-size="11" fill="white">Workflows</text>
+                    <text x="560" y="390" text-anchor="middle" font-size="10" fill="white">Port 8000</text>
+
+                    <rect x="680" y="330" width="180" height="70" fill="#4299e1" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="770" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="white">Matrix Synapse</text>
+                    <text x="770" y="375" text-anchor="middle" font-size="11" fill="white">Multi-Agent</text>
+                    <text x="770" y="390" text-anchor="middle" font-size="10" fill="white">Port 8008</text>
+
+                    <rect x="890" y="330" width="180" height="70" fill="#4299e1" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="980" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="white">OpenMemory</text>
+                    <text x="980" y="375" text-anchor="middle" font-size="11" fill="white">AI Memory</text>
+                    <text x="980" y="390" text-anchor="middle" font-size="10" fill="white">Port 8765</text>
+
+                    <!-- Arrow to MCP -->
+                    <line x1="350" y1="400" x2="350" y2="440" stroke="#2d3748" stroke-width="2"/>
+                    <polygon points="350,440 345,430 355,430" fill="#2d3748"/>
+
+                    <!-- Layer 4: MCP Integration -->
+                    <rect x="200" y="450" width="300" height="70" fill="#ed8936" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="350" y="478" text-anchor="middle" font-size="16" font-weight="bold" fill="white">MCP Middleware</text>
+                    <text x="350" y="495" text-anchor="middle" font-size="12" fill="white">Tool Execution Layer (Port 4001)</text>
+                    <text x="350" y="510" text-anchor="middle" font-size="11" fill="white">64 Tools via 9 MCP Servers</text>
+
+                    <!-- Arrows to MCP Servers -->
+                    <line x1="200" y1="520" x2="100" y2="580" stroke="#2d3748" stroke-width="2"/>
+                    <line x1="350" y1="520" x2="350" y2="580" stroke="#2d3748" stroke-width="2"/>
+                    <line x1="500" y1="520" x2="600" y2="580" stroke="#2d3748" stroke-width="2"/>
+
+                    <!-- Layer 5: MCP Servers -->
+                    <text x="350" y="610" text-anchor="middle" font-size="18" font-weight="bold" fill="#2d3748">MCP Tools Layer</text>
+
+                    <rect x="10" y="630" width="140" height="60" fill="#9f7aea" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="80" y="655" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Filesystem</text>
+                    <text x="80" y="675" text-anchor="middle" font-size="10" fill="white">9 tools</text>
+
+                    <rect x="160" y="630" width="140" height="60" fill="#9f7aea" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="230" y="655" text-anchor="middle" font-size="12" font-weight="bold" fill="white">PostgreSQL</text>
+                    <text x="230" y="675" text-anchor="middle" font-size="10" fill="white">1 tool</text>
+
+                    <rect x="310" y="630" width="140" height="60" fill="#9f7aea" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="380" y="655" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Playwright</text>
+                    <text x="380" y="675" text-anchor="middle" font-size="10" fill="white">7 tools</text>
+
+                    <rect x="460" y="630" width="140" height="60" fill="#9f7aea" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="530" y="655" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Memory</text>
+                    <text x="530" y="675" text-anchor="middle" font-size="10" fill="white">9 tools</text>
+
+                    <rect x="610" y="630" width="140" height="60" fill="#9f7aea" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="680" y="655" text-anchor="middle" font-size="12" font-weight="bold" fill="white">ArangoDB</text>
+                    <text x="680" y="675" text-anchor="middle" font-size="10" fill="white">7 tools</text>
+
+                    <!-- Layer 6: Data Stores -->
+                    <text x="700" y="750" text-anchor="middle" font-size="18" font-weight="bold" fill="#2d3748">Data Storage Layer</text>
+
+                    <rect x="50" y="770" width="160" height="60" fill="#48bb78" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="130" y="795" text-anchor="middle" font-size="13" font-weight="bold" fill="white">PostgreSQL x3</text>
+                    <text x="130" y="815" text-anchor="middle" font-size="10" fill="white">Main + Keycloak + Vector</text>
+
+                    <rect x="230" y="770" width="160" height="60" fill="#48bb78" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="310" y="795" text-anchor="middle" font-size="13" font-weight="bold" fill="white">ArangoDB</text>
+                    <text x="310" y="815" text-anchor="middle" font-size="10" fill="white">Multi-model DB</text>
+
+                    <rect x="410" y="770" width="160" height="60" fill="#48bb78" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="490" y="795" text-anchor="middle" font-size="13" font-weight="bold" fill="white">MongoDB</text>
+                    <text x="490" y="815" text-anchor="middle" font-size="10" fill="white">Document Store</text>
+
+                    <rect x="590" y="770" width="160" height="60" fill="#48bb78" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="670" y="795" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Redis</text>
+                    <text x="670" y="815" text-anchor="middle" font-size="10" fill="white">Cache Layer</text>
+
+                    <rect x="770" y="770" width="160" height="60" fill="#48bb78" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="850" y="795" text-anchor="middle" font-size="13" font-weight="bold" fill="white">TimescaleDB</text>
+                    <text x="850" y="815" text-anchor="middle" font-size="10" fill="white">Time-series</text>
+
+                    <rect x="950" y="770" width="160" height="60" fill="#48bb78" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="1030" y="795" text-anchor="middle" font-size="13" font-weight="bold" fill="white">MinIO</text>
+                    <text x="1030" y="815" text-anchor="middle" font-size="10" fill="white">S3 Storage</text>
+
+                    <!-- Layer 7: Applications -->
+                    <text x="700" y="900" text-anchor="middle" font-size="18" font-weight="bold" fill="#2d3748">Application Services Layer</text>
+
+                    <rect x="50" y="920" width="140" height="60" fill="#718096" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="120" y="945" text-anchor="middle" font-size="12" font-weight="bold" fill="white">GitLab CE</text>
+                    <text x="120" y="965" text-anchor="middle" font-size="10" fill="white">Code Hosting</text>
+
+                    <rect x="200" y="920" width="140" height="60" fill="#718096" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="270" y="945" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Nextcloud</text>
+                    <text x="270" y="965" text-anchor="middle" font-size="10" fill="white">File Sync</text>
+
+                    <rect x="350" y="920" width="140" height="60" fill="#718096" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="420" y="945" text-anchor="middle" font-size="12" font-weight="bold" fill="white">N8N</text>
+                    <text x="420" y="965" text-anchor="middle" font-size="10" fill="white">Automation</text>
+
+                    <rect x="500" y="920" width="140" height="60" fill="#718096" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="570" y="945" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Portainer</text>
+                    <text x="570" y="965" text-anchor="middle" font-size="10" fill="white">Container Mgmt</text>
+
+                    <rect x="650" y="920" width="140" height="60" fill="#718096" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="720" y="945" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Guacamole</text>
+                    <text x="720" y="965" text-anchor="middle" font-size="10" fill="white">Remote Desktop</text>
+
+                    <rect x="800" y="920" width="140" height="60" fill="#718096" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="870" y="945" text-anchor="middle" font-size="12" font-weight="bold" fill="white">OpenProject</text>
+                    <text x="870" y="965" text-anchor="middle" font-size="10" fill="white">Project Mgmt</text>
+
+                    <rect x="950" y="920" width="140" height="60" fill="#718096" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="1020" y="945" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Mailserver</text>
+                    <text x="1020" y="965" text-anchor="middle" font-size="10" fill="white">Email Services</text>
+
+                    <!-- Layer 8: Observability -->
+                    <text x="700" y="1050" text-anchor="middle" font-size="18" font-weight="bold" fill="#2d3748">Observability Layer</text>
+
+                    <rect x="200" y="1070" width="140" height="60" fill="#f59e0b" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="270" y="1095" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Loki + Promtail</text>
+                    <text x="270" y="1115" text-anchor="middle" font-size="10" fill="white">Log Aggregation</text>
+
+                    <rect x="350" y="1070" width="140" height="60" fill="#f59e0b" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="420" y="1095" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Grafana</text>
+                    <text x="420" y="1115" text-anchor="middle" font-size="10" fill="white">Visualization</text>
+
+                    <rect x="500" y="1070" width="140" height="60" fill="#f59e0b" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="570" y="1095" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Netdata</text>
+                    <text x="570" y="1115" text-anchor="middle" font-size="10" fill="white">System Metrics</text>
+
+                    <rect x="650" y="1070" width="140" height="60" fill="#f59e0b" stroke="#2d3748" stroke-width="2" rx="8"/>
+                    <text x="720" y="1095" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Dozzle</text>
+                    <text x="720" y="1115" text-anchor="middle" font-size="10" fill="white">Real-time Logs</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- PROJECT INVENTORY -->
+        <div class="section">
+            <h2 class="section-title">📦 Complete Project Inventory</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🤖 AI Services (8)</h3>
+                    <ul>
+                        <li>LiteLLM - LLM Gateway</li>
+                        <li>Open WebUI - Chat Interface</li>
+                        <li>LangChain - Workflows</li>
+                        <li>Matrix - Multi-Agent Platform</li>
+                        <li>OpenMemory - AI Memory</li>
+                        <li>Qdrant - Vector Database</li>
+                        <li>MCP - Tool Integration (11 containers)</li>
+                        <li>Claude - AI Development</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>🗄️ Data Stores (6)</h3>
+                    <ul>
+                        <li>PostgreSQL - Relational DB</li>
+                        <li>ArangoDB - Multi-model DB</li>
+                        <li>MongoDB - Document Store</li>
+                        <li>Redis - Cache Layer</li>
+                        <li>TimescaleDB - Time-series</li>
+                        <li>MinIO - Object Storage</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>🔒 Security & Auth (3)</h3>
+                    <ul>
+                        <li>Keycloak - SSO Provider</li>
+                        <li>Traefik - Reverse Proxy</li>
+                        <li>Bitwarden - Password Manager</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>📊 Observability (5)</h3>
+                    <ul>
+                        <li>Loki - Log Aggregation</li>
+                        <li>Promtail - Log Collection</li>
+                        <li>Grafana - Visualization</li>
+                        <li>Netdata - System Metrics</li>
+                        <li>Dozzle - Container Logs</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>💼 Applications (10)</h3>
+                    <ul>
+                        <li>GitLab - Code Hosting & CI/CD</li>
+                        <li>Nextcloud - File Sync</li>
+                        <li>N8N - Workflow Automation</li>
+                        <li>OpenProject - Project Management</li>
+                        <li>Guacamole - Remote Desktop</li>
+                        <li>Mailserver - Email Services</li>
+                        <li>Stirling PDF - PDF Tools</li>
+                        <li>Obsidian - Note-taking</li>
+                        <li>AList - File Manager</li>
+                        <li>Microbin - Pastebin</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>🛠️ Admin Tools (7)</h3>
+                    <ul>
+                        <li>Portainer - Container Management</li>
+                        <li>Dashy - Admin Dashboard</li>
+                        <li>Draw.io - Diagram Editor</li>
+                        <li>PgAdmin - PostgreSQL Admin</li>
+                        <li>Mongo Express - MongoDB Admin</li>
+                        <li>Redis Commander - Redis Admin</li>
+                        <li>DevScripts - Custom Scripts</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>🌐 Infrastructure (3)</h3>
+                    <ul>
+                        <li>Nginx - Web Server</li>
+                        <li>Traefik - Load Balancer</li>
+                        <li>Docker Mailserver - SMTP/IMAP</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>📚 Documentation & Config (4)</h3>
+                    <ul>
+                        <li>Admin - System Administration</li>
+                        <li>AINotes - Claude Documentation</li>
+                        <li>Archive - Historical Projects</li>
+                        <li>Backups - Data Backups</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- NETWORK TOPOLOGY -->
+        <div class="section">
+            <h2 class="section-title">🌐 Network Topology</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Core Networks</h3>
+                    <ul>
+                        <li>traefik-net (39 containers) - HTTPS routing</li>
+                        <li>postgres-net (14 containers) - Database access</li>
+                        <li>keycloak-net (4 containers) - Authentication</li>
+                        <li>observability-net (5 containers) - Monitoring</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Service Networks</h3>
+                    <ul>
+                        <li>litellm-net - AI gateway isolation</li>
+                        <li>mcp-net - MCP internal communication</li>
+                        <li>redis-net - Cache layer</li>
+                        <li>mongodb-net - Document storage</li>
+                        <li>arangodb-net - Graph database</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Application Networks</h3>
+                    <ul>
+                        <li>n8n-net - Workflow automation</li>
+                        <li>minio-net - Object storage</li>
+                        <li>mailserver-net - Email services</li>
+                        <li>guacamole-net - Remote desktop</li>
+                        <li>gitlab-net - Code hosting</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEPLOYMENT & ACCESS -->
+        <div class="section">
+            <h2 class="section-title">🚀 Deployment & Access</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Domain & SSL</h3>
+                    <ul>
+                        <li>Domain: ai-servicers.com</li>
+                        <li>SSL: Let's Encrypt wildcard</li>
+                        <li>Reverse Proxy: Traefik v3.4.3</li>
+                        <li>Local Access: linuxserver.lan</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Authentication</h3>
+                    <ul>
+                        <li>SSO: Keycloak v25.0</li>
+                        <li>OAuth2 Protected: 10 services</li>
+                        <li>Group: /administrators</li>
+                        <li>Password Manager: Bitwarden</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Data Management</h3>
+                    <ul>
+                        <li>Projects: /home/administrator/projects/</li>
+                        <li>Data: /home/administrator/projects/data/</li>
+                        <li>Secrets: /home/administrator/secrets/</li>
+                        <li>Storage: 1.8TB total, 173GB used (10%)</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>System Resources</h3>
+                    <ul>
+                        <li>Memory: 62GB total, 48GB available</li>
+                        <li>Containers: 75 running</li>
+                        <li>Networks: 29 custom</li>
+                        <li>Platform: Linux 6.14.0</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background: #4299e1;"></div>
+                <span>AI Services</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #ed8936;"></div>
+                <span>Processing/Integration</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #9f7aea;"></div>
+                <span>MCP Tools/Security</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #48bb78;"></div>
+                <span>Data Storage</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #f59e0b;"></div>
+                <span>Infrastructure/Observability</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #718096;"></div>
+                <span>Application Services</span>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <strong>AI Servicers Infrastructure Architecture v1.0</strong><br>
+            Generated: 2025-11-04 | Comprehensive infrastructure documentation<br>
+            Technologies: Docker, Traefik, Keycloak, PostgreSQL, ArangoDB, LiteLLM, Matrix, MCP, Loki, Grafana
+        </footer>
+    </div>
+</body>
+</html>
