@@ -12,7 +12,7 @@ services:
   traefik:
     image: ${TRAEFIK_IMAGE:-traefik:v3.4}
     container_name: ${TRAEFIK_CONTAINER_NAME:-traefik}
-    restart: always
+    restart: unless-stopped
     networks:
       traefik-net:
         ipv4_address: 172.25.0.6
@@ -45,7 +45,7 @@ services:
   traefik-certs-dumper:
     image: ${CERTS_DUMPER_IMAGE:-ldez/traefik-certs-dumper:v2.8.3}
     container_name: ${CERTS_DUMPER_CONTAINER_NAME:-traefik-certs-dumper}
-    restart: always
+    restart: unless-stopped
     networks:
       - traefik-net
     volumes:
