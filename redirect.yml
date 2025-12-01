@@ -31,7 +31,7 @@ http:
         sourceRange:
           - "192.168.1.0/24"
 
-    # c) remove Keycloak’s HSTS header
+    # c) remove Keycloak's HSTS header
     # The 'strip-hsts' middleware below had invalid syntax for Traefik v3,
     # which prevented this file from loading. It has been commented out
     # to allow Traefik to start correctly.
@@ -40,3 +40,14 @@ http:
     #   headers:
     #     removeResponseHeaders:
     #       - Strict-Transport-Security
+
+    # d) Keycloak forward auth - protects services with SSO
+    # Services can use: traefik.http.routers.{service}.middlewares=keycloak-auth@file
+    keycloak-auth:
+      forwardAuth:
+        address: "http://keycloak-forward-auth:4180/oauth2/auth"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - X-Auth-Request-User
+          - X-Auth-Request-Email
+          - X-Auth-Request-Groups
