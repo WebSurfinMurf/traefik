@@ -43,6 +43,7 @@ http:
 
     # d) Keycloak forward auth - protects services with SSO
     # Services can use: traefik.http.routers.{service}.middlewares=keycloak-auth@file
+    # NOTE: Changed from /oauth2/auth to /oauth2/ for proper redirect handling
     keycloak-auth:
       forwardAuth:
         address: "http://keycloak-forward-auth:4180/oauth2/auth"
@@ -51,3 +52,26 @@ http:
           - X-Auth-Request-User
           - X-Auth-Request-Email
           - X-Auth-Request-Groups
+          - X-Auth-Request-Redirect
+          - X-Forwarded-Preferred-Username
+          - Set-Cookie
+
+    # e) Auth error redirect - uses plugin to return 302 instead of preserving 401
+    # Use with keycloak-auth: middlewares=auth-redirect@file,keycloak-auth@file
+    # This plugin catches 401/403 and returns a proper 302 redirect to oauth2-proxy
+    auth-redirect:
+      plugin:
+        redirecterrors:
+          status:
+            - "401"
+            - "403"
+          target: "https://auth.ai-servicers.com/oauth2/start?rd={url}"
+          outputStatus: 302
+
+  services:
+    # Service for auth error redirects
+    forward-auth-svc:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://keycloak-forward-auth:4180"

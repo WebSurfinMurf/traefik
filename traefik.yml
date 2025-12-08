@@ -4,6 +4,13 @@
 log:
   level: INFO
 
+########## PLUGINS ##########
+experimental:
+  plugins:
+    redirecterrors:
+      moduleName: "github.com/indivisible/redirecterrors"
+      version: "v0.1.0"
+
 accessLog:
   bufferingSize: 100
 
