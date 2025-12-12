@@ -195,6 +195,26 @@ curl -s http://localhost:8083/api/tcp/routers | jq
 
 ## Troubleshooting
 
+### Multi-Service Container (Router Missing)
+When a container exposes multiple services (e.g., GitLab + Container Registry), Traefik cannot auto-link routers:
+
+**Error**: `Router X cannot be linked automatically with multiple Services: ["service1" "service2"]`
+
+**Solution**: Explicitly specify which service each router uses:
+```bash
+# For each router, add the .service label
+--label "traefik.http.routers.myapp.service=myapp"
+--label "traefik.http.routers.myapp-api.service=myapp-api"
+```
+
+**Example (GitLab with Registry)**:
+```bash
+--label "traefik.http.routers.gitlab.service=gitlab"
+--label "traefik.http.services.gitlab.loadbalancer.server.port=80"
+--label "traefik.http.routers.gitlab-registry.service=gitlab-registry"
+--label "traefik.http.services.gitlab-registry.loadbalancer.server.port=5050"
+```
+
 ### Service Not Accessible
 1. Check container is running: `docker ps | grep <service>`
 2. Verify labels: `docker inspect <container> | grep -A20 Labels`
@@ -227,5 +247,5 @@ curl -s http://localhost:8083/api/tcp/routers | jq
 - **Nice to have**: Container labels (in deploy scripts)
 
 ---
-*Last Updated: 2025-08-24 by Claude*
+*Last Updated: 2025-12-11 by Claude*
 *Status: ✅ FULLY OPERATIONAL - All services working including mail*
