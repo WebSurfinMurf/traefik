@@ -18,6 +18,19 @@ http:
         - https-redirect
       service: noop@internal
 
+    # 3) Protected: LiveKit Debug page (requires Keycloak login)
+    nginx-livekit-debug:
+      rule: "Host(`nginx.ai-servicers.com`) && Path(`/livekit-debug.html`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - auth-redirect
+        - keycloak-auth
+      service: nginx-svc
+      tls:
+        certResolver: letsencrypt
+      priority: 100
+
   middlewares:
     # a) standard HTTPS redirect
     https-redirect:
@@ -75,3 +88,10 @@ http:
         passHostHeader: true
         servers:
           - url: "http://keycloakforwardauth:4180"
+
+    # Nginx service for protected routes
+    nginx-svc:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://nginx:80"
