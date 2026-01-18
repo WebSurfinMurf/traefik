@@ -46,7 +46,7 @@ http:
     # NOTE: Changed from /oauth2/auth to /oauth2/ for proper redirect handling
     keycloak-auth:
       forwardAuth:
-        address: "http://keycloak-forward-auth:4180/oauth2/auth"
+        address: "http://keycloakforwardauth:4180/oauth2/auth"
         trustForwardHeader: true
         authResponseHeaders:
           - X-Auth-Request-User
@@ -74,4 +74,4 @@ http:
       loadBalancer:
         passHostHeader: true
         servers:
-          - url: "http://keycloak-forward-auth:4180"
+          - url: "http://keycloakforwardauth:4180"
