@@ -65,6 +65,7 @@ http:
           - X-Auth-Request-User
           - X-Auth-Request-Email
           - X-Auth-Request-Groups
+          - X-Auth-Request-Preferred-Username
           - X-Auth-Request-Redirect
           - X-Forwarded-Preferred-Username
           - Set-Cookie
@@ -80,6 +81,12 @@ http:
             - "403"
           target: "https://auth.ai-servicers.com/oauth2/start?rd={url}"
           outputStatus: 302
+
+    # f) Basic auth for meeting room (open to external guests with shared password)
+    meeting-basicauth:
+      basicAuth:
+        users:
+          - "guest:$apr1$7bshgcH8$R6/Wu.FjXl91UrK4IkT4w/"
 
   services:
     # Service for auth error redirects
