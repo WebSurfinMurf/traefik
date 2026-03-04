@@ -18,7 +18,17 @@ http:
         - https-redirect
       service: noop@internal
 
-    # 3) Protected: LiveKit Debug page (requires Keycloak login)
+    # 3) Public homepage for ai-servicers.com root domain
+    homepage-router:
+      rule: "Host(`ai-servicers.com`)"
+      entryPoints:
+        - websecure
+      service: nginx-svc
+      tls:
+        certResolver: letsencrypt
+      priority: 5
+
+    # 4) Protected: LiveKit Debug page (requires Keycloak login)
     nginx-livekit-debug:
       rule: "Host(`nginx.ai-servicers.com`) && Path(`/livekit-debug.html`)"
       entryPoints:
