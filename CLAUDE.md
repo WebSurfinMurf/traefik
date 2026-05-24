@@ -1,4 +1,14 @@
+---
+context-save:
+  files: [architecture, conventions, gotchas, interfaces, operations, requirements, security, testing]
+  gotchas_via_memory: false
+---
+
 # Traefik Reverse Proxy - Complete Configuration Guide
+
+> 🔀 **Session history (refocus)**: See [docs/refocus/INDEX.md](docs/refocus/INDEX.md) for incoming briefs and outbound spawns.
+
+> 📚 **Canonical project knowledge**: See [docs/context/](docs/context/) for terse, factual state (architecture, gotchas, operations, etc.). CLAUDE.md = directives + narrative; docs/context/ = reconstruction blueprint.
 
 > **For overall environment context, see: `/home/administrator/projects/AINotes/AINotes.md`**
 
@@ -160,6 +170,11 @@ imaps: ":993"        # IMAP over SSL
 - ✅ FIXED: Mail server TCP routing now working with TLS passthrough
 - ✅ FIXED: Container connectivity via hosts file workaround for NAT reflection
 - ✅ WORKING: Nextcloud can connect to mail server via mail.ai-servicers.com
+- ✅ FIXED 2026-05-08: Docker provider API negotiation. Traefik 3.4.x's embedded Docker SDK requested `/v1.24/version` against an upgraded daemon (`MinAPIVersion 1.44`); zero docker-defined routers loaded → all `traefik.enable=true` hosts returned 404 platform-wide. `DOCKER_API_VERSION` env had no effect (SDK client not built with `client.FromEnv`). Fix: bumped `TRAEFIK_IMAGE` in `secrets/traefik.env` from `v3.4.3` → `v3.6.16` (3.5+ adds API version negotiation). Side effect: `--remove-orphans` removed the unused `traefik-docker-proxy` sidecar (already broken, socket perms). Origin: refocus brief from `dashy/` session, 2026-05-08.
+- ✅ FIXED 2026-05-23: ACME DNS-01 renewal blocked by wildcard CNAME → foreign zone. `*.ai-servicers.com CNAME embracenow.asuscomm.com` synthesized responses for every `_acme-challenge.*` query; lego's SOA walk landed on `asuscomm.com` (not Cloudflare-writable), every renewal failed with `failed to find zone asuscomm.com`. Three certs had already expired (apex+wildcard, registry.gitlab, open-webui — May 11/15). Fix: created `home.ai-servicers.com` A record (residential IP), repointed wildcard to it (in-zone), migrated apex CNAME → A (proxied=true, same externally-observable behavior), added explicit `mail.ai-servicers.com` A (DNS-only, decoupled from wildcard). DDNS is now push-based via new `projects/ddns-updater` (qmcgaw/ddns-updater container, separate CF token, manages apex/home/mail every 5 min). All certs reissued, valid until Aug 21 2026. Grafana alert on ERROR-level ddns-updater logs added (folder `infra`, uid `ffmz3egkg7dhca`, routes to `grafana-default-email`). See `docs/acme-renewal-2026-05-08/PLAN.md` and `docs/reviews/acme-ddns-arch-collision.final.md` for the full architectural reasoning.
+
+### Open Issues
+- (none)
 
 ### Router NAT Reflection Workaround
 ASUS routers with Merlin firmware cause mail.ai-servicers.com to resolve to local IP (192.168.1.13).
@@ -247,5 +262,5 @@ When a container exposes multiple services (e.g., GitLab + Container Registry), 
 - **Nice to have**: Container labels (in deploy scripts)
 
 ---
-*Last Updated: 2025-12-11 by Claude*
-*Status: ✅ FULLY OPERATIONAL - All services working including mail*
+*Last Updated: 2026-05-08 by Claude*
+*Status: ✅ FULLY OPERATIONAL - Traefik on v3.6.16; all docker-discovered routers loaded*

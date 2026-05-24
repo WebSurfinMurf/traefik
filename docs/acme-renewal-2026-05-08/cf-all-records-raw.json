@@ -1,0 +1,291 @@
+[
+  {
+    "id": "2ec455fd9346abf9754f58499406face",
+    "name": "*.ai-servicers.com",
+    "type": "CNAME",
+    "content": "embracenow.asuscomm.com",
+    "proxiable": true,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2025-07-06T19:53:14.181991Z",
+    "modified_on": "2026-03-12T20:41:11.608853Z"
+  },
+  {
+    "id": "d15981ea56f722004510efd7b266b655",
+    "name": "ai-servicers.com",
+    "type": "CNAME",
+    "content": "embracenow.asuscomm.com",
+    "proxiable": true,
+    "proxied": true,
+    "ttl": 1,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2025-07-11T00:01:38.880427Z",
+    "modified_on": "2026-03-12T20:41:03.568346Z"
+  },
+  {
+    "id": "f3db6b38a357fb4c173962349c8c0ebc",
+    "name": "brevo1._domainkey.ai-servicers.com",
+    "type": "CNAME",
+    "content": "b1.ai-servicers-com.dkim.brevo.com",
+    "proxiable": true,
+    "proxied": false,
+    "ttl": 3600,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T02:21:09.532278Z",
+    "modified_on": "2026-03-03T02:21:09.532278Z"
+  },
+  {
+    "id": "43406e7ffdce20ef2317f5e782972367",
+    "name": "brevo2._domainkey.ai-servicers.com",
+    "type": "CNAME",
+    "content": "b2.ai-servicers-com.dkim.brevo.com",
+    "proxiable": true,
+    "proxied": false,
+    "ttl": 3600,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T02:21:09.412653Z",
+    "modified_on": "2026-03-03T02:21:09.412653Z"
+  },
+  {
+    "id": "80babb7833a583de87a1c26b6dc814ac",
+    "name": "em903.ai-servicers.com",
+    "type": "CNAME",
+    "content": "u55454498.wl249.sendgrid.net",
+    "proxiable": true,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": "sendgrid.com",
+    "tags": [],
+    "created_on": "2025-08-24T00:46:22.424631Z",
+    "modified_on": "2025-08-24T00:49:19.778205Z",
+    "comment_modified_on": "2025-08-24T00:46:22.424631Z"
+  },
+  {
+    "id": "28bd814b41986629362b7857306b2075",
+    "name": "mailu.ai-servicers.com",
+    "type": "CNAME",
+    "content": "embracenow.asuscomm.com",
+    "proxiable": true,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2025-07-08T00:33:58.393563Z",
+    "modified_on": "2026-03-12T20:41:22.096473Z"
+  },
+  {
+    "id": "01e01b26f281321b7ff6661c9d6caf8b",
+    "name": "s1._domainkey.ai-servicers.com",
+    "type": "CNAME",
+    "content": "s1.domainkey.u55454498.wl249.sendgrid.net",
+    "proxiable": true,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": "sendgrid.com",
+    "tags": [],
+    "created_on": "2025-08-24T00:46:51.449139Z",
+    "modified_on": "2025-08-24T00:49:28.374637Z",
+    "comment_modified_on": "2025-08-24T00:46:51.449139Z"
+  },
+  {
+    "id": "b475474d0d3aad8f9010781b5d0cb1dc",
+    "name": "s2._domainkey.ai-servicers.com",
+    "type": "CNAME",
+    "content": "s2.domainkey.u55454498.wl249.sendgrid.net",
+    "proxiable": true,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": "sendgrid.com",
+    "tags": [],
+    "created_on": "2025-08-24T00:47:19.044898Z",
+    "modified_on": "2025-08-24T00:49:34.31577Z",
+    "comment_modified_on": "2025-08-24T00:47:19.044898Z"
+  },
+  {
+    "id": "27297f964b2212c202b394a585841bd3",
+    "name": "ai-servicers.com",
+    "type": "MX",
+    "content": "route3.mx.cloudflare.net",
+    "priority": 40,
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {},
+    "meta": {
+      "email_routing": true,
+      "read_only": true
+    },
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T00:56:36.251435Z",
+    "modified_on": "2026-03-03T00:56:36.251435Z"
+  },
+  {
+    "id": "b7564f8c0d97a64ae328f36d44511b9b",
+    "name": "ai-servicers.com",
+    "type": "MX",
+    "content": "route2.mx.cloudflare.net",
+    "priority": 74,
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {},
+    "meta": {
+      "email_routing": true,
+      "read_only": true
+    },
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T00:56:36.242808Z",
+    "modified_on": "2026-03-03T00:56:36.242808Z"
+  },
+  {
+    "id": "0090ec7c431ab6494db87b814e29f99a",
+    "name": "ai-servicers.com",
+    "type": "MX",
+    "content": "route1.mx.cloudflare.net",
+    "priority": 80,
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {},
+    "meta": {
+      "email_routing": true,
+      "read_only": true
+    },
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T00:56:36.232949Z",
+    "modified_on": "2026-03-03T00:56:36.232949Z"
+  },
+  {
+    "id": "d38fa1624ecfcd2442a1dba5c89c5607",
+    "name": "ai-servicers.com",
+    "type": "TXT",
+    "content": "\"v=spf1 a:mail.ai-servicers.com include:sendinblue.com include:_spf.mx.cloudflare.net ~all\"",
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {},
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T00:56:36.260025Z",
+    "modified_on": "2026-03-03T02:23:55.30983Z"
+  },
+  {
+    "id": "6724215cbd133156e4ed4ae83bbb9c48",
+    "name": "ai-servicers.com",
+    "type": "TXT",
+    "content": "\"brevo-code:b62f18878a09dc126bc5fdf84283c5b4\"",
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 3600,
+    "settings": {},
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T02:21:09.534273Z",
+    "modified_on": "2026-03-03T02:21:09.534273Z"
+  },
+  {
+    "id": "c2747b9a4eec55e613b31133dd0597b4",
+    "name": "ai-servicers.com",
+    "type": "TXT",
+    "content": "\"google-site-verification=8wkt3dO6arZt4OHUzoqqyBzKJZWX5Uj52DOH6bWQ_Zc\"",
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 3600,
+    "settings": {},
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2025-08-27T03:10:21.432127Z",
+    "modified_on": "2025-08-27T03:10:21.432127Z"
+  },
+  {
+    "id": "613b2a37127aab1976eaade935d6e0d5",
+    "name": "cf2024-1._domainkey.ai-servicers.com",
+    "type": "TXT",
+    "content": "\"v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiweykoi+o48IOGuP7GR3X0MOExCUDY/BCRHoWBnh3rChl7WhdyCxW3jgq1daEjPPqoi7sJvdg5hEQVsgVRQP4DcnQDVjGMbASQtrY4WmB1VebF+RPJB2ECPsEDTpeiI5ZyUAwJaVX7r6bznU67g7LvFq35yIo4sdlmtZGV+i0H4cpYH9+3JJ78k\" \"m4KXwaf9xUJCWF6nxeD+qG6Fyruw1Qlbds2r85U9dkNDVAS3gioCvELryh1TxKGiVTkg4wqHTyHfWsp7KD3WQHYJn0RyfJJu6YEmL77zonn7p2SRMvTMP3ZEXibnC9gz3nnhR6wcYL8Q7zXypKTMD58bTixDSJwIDAQAB\"",
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {},
+    "meta": {
+      "email_routing": true,
+      "read_only": true
+    },
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T00:56:36.268408Z",
+    "modified_on": "2026-03-03T00:56:36.268408Z"
+  },
+  {
+    "id": "7709090c1aa4c6fb7d86c72c37e757b9",
+    "name": "_dmarc.ai-servicers.com",
+    "type": "TXT",
+    "content": "\"v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com\"",
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 3600,
+    "settings": {},
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T02:21:09.459387Z",
+    "modified_on": "2026-03-03T02:21:09.459387Z"
+  },
+  {
+    "id": "9817d5796e6835122586319dc4382ac4",
+    "name": "mail._domainkey.ai-servicers.com",
+    "type": "TXT",
+    "content": "\"v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiweykoi+o48IOGuP7GR3X0MOExCUDY/BCRHoWBnh3rChl7WhdyCxW3jgq1daEjPPqoi7sJvdg5hEQVsgVRQP4DcnQDVjGMbASQtrY4WmB1VebF+RPJB2ECPsEDTpeiI5ZyUAwJaVX7r6bznU67g7LvFq35yIo4sdlmtZGV+i0H4cpYH9+3JJ78k\" \"m4KXwaf9xUJCWF6nxeD+qG6Fyruw1Qlbds2r85U9dkNDVAS3gioCvELryh1TxKGiVTkg4wqHTyHfWsp7KD3WQHYJn0RyfJJu6YEmL77zonn7p2SRMvTMP3ZEXibnC9gz3nnhR6wcYL8Q7zXypKTMD58bTixDSJwIDAQAB\"",
+    "proxiable": false,
+    "proxied": false,
+    "ttl": 1,
+    "settings": {},
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-03-03T02:08:18.109511Z",
+    "modified_on": "2026-03-03T02:08:43.969934Z"
+  }
+]

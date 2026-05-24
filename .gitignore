@@ -8,3 +8,4 @@ secrets/
 *.key
 *.pem
 .credentials.json
+docs/refocus/INDEX.md
