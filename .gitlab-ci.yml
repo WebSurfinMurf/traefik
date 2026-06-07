@@ -1,0 +1,76 @@
+# GitLab-centric deploy for traefik reverse proxy.
+#
+# Source of truth is GitLab. Pushes to main trigger validate + deploy + test.
+# After a successful deploy, the mirror stage pushes to GitHub as a backup.
+#
+# Runtime: the `linuxserver-administrator` runner is the gitlab-runner-admin
+# container — root, with the host docker socket and /home/administrator both
+# bind-mounted. Deploy drives the host docker daemon directly; only `mirror`
+# needs SSH to push administrator's keys to GitHub by absolute path.
+
+stages:
+  - validate
+  - deploy
+  - test
+  - mirror
+
+variables:
+  ADMIN_HOME: /home/administrator
+  SECRETS_FILE: /home/administrator/projects/secrets/traefik.env
+
+# Validate traefik config files (YAML syntax + docker-compose).
+validate:
+  stage: validate
+  tags: [shell, linuxserver, administrator]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "api"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - export HOME="$ADMIN_HOME"
+    - set -a; . "$SECRETS_FILE"; set +a
+    - ./scripts/validate.sh
+
+# Deploy on any push to main and on manual web/API runs.
+deploy:
+  stage: deploy
+  tags: [shell, linuxserver, administrator]
+  needs: [validate]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "api"'
+  script:
+    - export HOME="$ADMIN_HOME"
+    - set -a; . "$SECRETS_FILE"; set +a
+    - ./deploy.sh
+  environment:
+    name: production
+    url: https://traefik.ai-servicers.com
+
+# Post-deploy health check against the Traefik API.
+test:
+  stage: test
+  tags: [shell, linuxserver, administrator]
+  needs: [deploy]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "api"'
+  script:
+    - sleep 8  # let the recreated container settle
+    - ./scripts/healthcheck.sh
+
+# Push mirror: GitLab -> GitHub (backup). Runs after successful deploy+test.
+mirror:
+  stage: mirror
+  tags: [shell, linuxserver, administrator]
+  needs: [test]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "api"'
+  script:
+    - ./scripts/mirror-to-github.sh
+  allow_failure: true  # mirror failure shouldn't block deploys
